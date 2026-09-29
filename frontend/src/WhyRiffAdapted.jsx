@@ -1,5 +1,5 @@
 // WhyRiffAdapted.jsx
-// Explainability modal for Riff Autopilot.
+// Student-friendly explainability modal for Riff Autopilot.
 
 import { motion } from "framer-motion";
 
@@ -21,7 +21,7 @@ export default function WhyRiffAdapted({
   const modalityNames = {
     text: "Text Explanation",
     visual: "Visual Diagram (RiffBoard)",
-    "micro-step": "Micro-Step Mode",
+    "micro-step": "Step-by-Step Focus Mode",
     analogy: "Concept Bridge (Analogy)",
     audio: "Audio Read Aloud",
     interactive: "Interactive Challenge",
@@ -35,19 +35,19 @@ export default function WhyRiffAdapted({
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-xl p-6 sm:p-8 rounded-3xl bg-[#0e0e12] border border-white/15 shadow-2xl shadow-black relative"
+        className="w-full max-w-xl p-6 sm:p-8 rounded-3xl bg-[#0D0912] border border-white/15 shadow-2xl shadow-black relative"
       >
         <div className="flex items-center justify-between mb-4">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-indigo-400 font-bold px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30">
-            EXPLAINABLE AI
+          <span className="font-mono text-[10px] uppercase tracking-widest text-[#C084FC] font-bold px-2.5 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
+            TRANSPARENT AI
           </span>
           <button onClick={onClose} className="text-white/40 hover:text-white text-lg">
             ✕
           </button>
         </div>
 
-        <h3 className="font-serif text-2xl text-white font-normal mb-4">
-          Why Riff Changed Its Teaching Strategy
+        <h3 className="font-display text-2xl text-white font-bold mb-4">
+          Why did Riff change the explanation?
         </h3>
 
         {/* Transition Bubble */}
@@ -56,19 +56,19 @@ export default function WhyRiffAdapted({
             <span className="block font-mono text-[10px] uppercase text-white/40">From Strategy</span>
             <span className="font-semibold text-sm text-white">{modalityNames[fromModality] || fromModality}</span>
           </div>
-          <span className="text-indigo-400 text-xl">➔</span>
+          <span className="text-[#C084FC] text-xl">➔</span>
           <div>
-            <span className="block font-mono text-[10px] uppercase text-indigo-300">To Strategy</span>
-            <span className="font-semibold text-sm text-emerald-400">{modalityNames[toModality] || toModality}</span>
+            <span className="block font-mono text-[10px] uppercase text-[#C084FC]">To Strategy</span>
+            <span className="font-semibold text-sm text-[#47BFFF]">{modalityNames[toModality] || toModality}</span>
           </div>
         </div>
 
         {/* Observed Signals */}
         <div className="mb-4">
           <span className="block text-xs font-semibold uppercase font-mono text-white/70 mb-2">
-            🔍 Observed Interaction Signals:
+            Riff noticed:
           </span>
-          <ul className="space-y-1.5 pl-4 text-xs text-white/60 list-disc">
+          <ul className="space-y-1.5 pl-4 text-xs text-white/70 list-disc">
             {observedSignals.map((sig, i) => (
               <li key={i}>{sig}</li>
             ))}
@@ -76,16 +76,16 @@ export default function WhyRiffAdapted({
         </div>
 
         {/* Pedagogical Rationale */}
-        <div className="mb-6 p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30">
-          <span className="block text-xs font-semibold text-indigo-300 mb-1">
-            💡 Pedagogical Rationale:
+        <div className="mb-6 p-4 rounded-xl bg-[#7C3AED]/15 border border-[#9F67FF]/30">
+          <span className="block text-xs font-semibold text-[#C084FC] mb-1">
+            💡 So Riff changed the teaching style:
           </span>
-          <p className="text-xs text-white/80 leading-relaxed m-0">{reasonText}</p>
+          <p className="text-xs text-white/90 leading-relaxed m-0">{reasonText}</p>
         </div>
 
         {/* Feedback buttons */}
         <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="text-xs text-white/50">Did this change help you?</span>
+          <span className="text-xs text-white/50">Did this adaptation help you?</span>
           <div className="flex gap-2">
             <button
               onClick={() => {

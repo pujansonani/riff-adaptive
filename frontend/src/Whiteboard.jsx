@@ -1,18 +1,18 @@
 // Whiteboard.jsx
 // Smart RiffBoard: Interactive multimodal canvas with structured concept diagrams,
-// zoom/pan controls, text labels, shape differentiation, and Socratic visual feedback.
+// dark glass toolbar, text labels, shape differentiation, and Socratic visual feedback.
 
 import { useRef, useState, useEffect, useCallback } from "react";
 
 const PALETTE = [
-  "#16261f", // Ink
-  "#2d6e5e", // Riff Teal
-  "#ff6b4a", // Coral
-  "#3b82f6", // Blue
-  "#8b5cf6", // Purple
-  "#f59e0b", // Amber
-  "#10b981", // Emerald
-  "#ef4444", // Red
+  "#FFFFFF", // White
+  "#9F67FF", // Riff Purple
+  "#47BFFF", // Riff Cyan
+  "#10B981", // Emerald
+  "#F59E0B", // Amber
+  "#F43F5E", // Rose
+  "#E2E8F0", // Slate
+  "#64748B", // Muted
 ];
 
 const STROKE_SIZES = [2, 4, 8, 14];
@@ -27,13 +27,12 @@ export default function Whiteboard({
 }) {
   const canvasRef = useRef(null);
   const [tool, setTool] = useState("brush"); // brush | line | arrow | rect | circle | text | eraser
-  const [color, setColor] = useState("#2d6e5e");
+  const [color, setColor] = useState("#9F67FF");
   const [lineWidth, setLineWidth] = useState(4);
   const [isDrawing, setIsDrawing] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [textPos, setTextPos] = useState(null);
   const [labels, setLabels] = useState([]);
-  const [zoomScale, setZoomScale] = useState(1);
 
   // Undo/redo history
   const [history, setHistory] = useState([]);
@@ -42,7 +41,7 @@ export default function Whiteboard({
   const startPos = useRef({ x: 0, y: 0 });
   const snapshotRef = useRef(null);
 
-  // Initialize canvas
+  // Initialize dark canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -50,8 +49,8 @@ export default function Whiteboard({
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-    // Set clean white background
-    ctx.fillStyle = "#ffffff";
+    // Set dark background
+    ctx.fillStyle = "#0A0710";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const initialData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -90,7 +89,7 @@ export default function Whiteboard({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#0A0710";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     setLabels([]);
     saveHistoryState();
@@ -123,8 +122,8 @@ export default function Whiteboard({
 
     ctx.beginPath();
     ctx.moveTo(coords.x, coords.y);
-    ctx.strokeStyle = tool === "eraser" ? "#ffffff" : color;
-    ctx.lineWidth = tool === "eraser" ? lineWidth * 3 : lineWidth;
+    ctx.strokeStyle = tool === "eraser" ? "#0A0710" : color;
+    ctx.lineWidth = tool === "eraser" ? lineWidth * 4 : lineWidth;
   };
 
   const draw = (e) => {
@@ -193,7 +192,7 @@ export default function Whiteboard({
     if (!textInput.trim() || !textPos) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    ctx.font = "bold 16px Inter, sans-serif";
+    ctx.font = "bold 16px 'Inter Tight', Inter, sans-serif";
     ctx.fillStyle = color;
     ctx.fillText(textInput.trim(), textPos.x, textPos.y);
 
@@ -211,38 +210,42 @@ export default function Whiteboard({
   };
 
   return (
-    <div className="riff-whiteboard-card">
-      <div className="riff-wb-header">
+    <div className="w-full p-6 sm:p-8 rounded-3xl bg-white/[0.04] border border-white/[0.1] backdrop-blur-2xl shadow-2xl space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <span className="riff-panel-label" style={{ margin: 0 }}>
-            Smart RiffBoard — Visual Concept Canvas
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#C084FC] font-semibold px-2.5 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
+            Spatial Concept Canvas
           </span>
-          <p className="riff-wb-subtitle">
-            Diagram stages, sketch relationships, or auto-render concept models.
+          <h3 className="font-display text-2xl sm:text-3xl text-white font-bold mt-2">
+            Smart RiffBoard Workspace
+          </h3>
+          <p className="text-white/50 text-xs mt-1">
+            Draw relationships, annotate conceptual steps, or auto-render structural models.
           </p>
         </div>
-        <div className="riff-wb-actions">
+
+        <div className="flex flex-wrap items-center gap-3">
           <button
-            className="riff-btn-small accept"
             onClick={onVisualizeConcept}
             disabled={isVisualizing}
-            title="Auto-generate a structured schematic diagram"
+            className="px-5 py-2 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-lg shadow-[#7C3AED]/20 disabled:opacity-40"
           >
             {isVisualizing ? "Visualizing..." : "✨ Auto-Visualize Concept"}
           </button>
           <button
-            className="riff-btn-small ghost"
             onClick={handleAskRiffDrawing}
-            title="Get Socratic tutoring feedback on your diagram labels"
+            className="px-5 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-white text-xs font-semibold transition-all backdrop-blur-md"
           >
-            💡 Ask Riff About This
+            💡 Ask Riff About Drawing
           </button>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="riff-wb-toolbar" role="toolbar" aria-label="Drawing and Diagram Tools">
-        <div className="riff-wb-toolgroup">
+      {/* Glass Toolbar */}
+      <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-wrap items-center justify-between gap-3">
+        {/* Tools */}
+        <div className="flex items-center gap-1.5 flex-wrap">
           {[
             { id: "brush", label: "✏️ Pen" },
             { id: "arrow", label: "➡️ Arrow" },
@@ -254,72 +257,75 @@ export default function Whiteboard({
           ].map((t) => (
             <button
               key={t.id}
-              className={`riff-wb-tool-btn ${tool === t.id ? "active" : ""}`}
               onClick={() => setTool(t.id)}
-              aria-label={t.label}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                tool === t.id
+                  ? "bg-[#7C3AED] text-white border-[#9F67FF]"
+                  : "bg-white/[0.03] border-white/10 text-white/70 hover:text-white hover:bg-white/10"
+              }`}
             >
               {t.label}
             </button>
           ))}
         </div>
 
-        <div className="riff-wb-toolgroup">
-          <div className="riff-wb-palette" role="group" aria-label="Colors">
-            {PALETTE.map((p) => (
-              <button
-                key={p}
-                className={`riff-wb-color-dot ${color === p ? "selected" : ""}`}
-                style={{ backgroundColor: p }}
-                onClick={() => setColor(p)}
-                aria-label={`Select color ${p}`}
-              />
-            ))}
-          </div>
+        {/* Color Palette */}
+        <div className="flex items-center gap-1.5">
+          {PALETTE.map((p) => (
+            <button
+              key={p}
+              onClick={() => setColor(p)}
+              className={`w-6 h-6 rounded-full border transition-all ${
+                color === p ? "ring-2 ring-white scale-110" : "border-white/20 opacity-70 hover:opacity-100"
+              }`}
+              style={{ backgroundColor: p }}
+              aria-label={`Color ${p}`}
+            />
+          ))}
         </div>
 
-        <div className="riff-wb-toolgroup">
-          <div className="riff-wb-strokes" role="group" aria-label="Stroke width">
+        {/* Stroke Sizes & Actions */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl">
             {STROKE_SIZES.map((size) => (
               <button
                 key={size}
-                className={`riff-wb-size-btn ${lineWidth === size ? "active" : ""}`}
                 onClick={() => setLineWidth(size)}
-                aria-label={`${size} pixel width`}
+                className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                  lineWidth === size ? "bg-white/20" : "hover:bg-white/10"
+                }`}
               >
                 <span
+                  className="rounded-full"
                   style={{
-                    width: `${size * 1.5 + 4}px`,
-                    height: `${size * 1.5 + 4}px`,
-                    borderRadius: "50%",
-                    background: color,
-                    display: "inline-block",
+                    width: `${size * 1.5 + 2}px`,
+                    height: `${size * 1.5 + 2}px`,
+                    backgroundColor: color,
                   }}
                 />
               </button>
             ))}
           </div>
-        </div>
 
-        <div className="riff-wb-toolgroup right">
           <button
-            className="riff-wb-tool-btn icon-only"
             onClick={handleUndo}
             disabled={historyStep <= 0}
+            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-xs disabled:opacity-30 text-white"
             title="Undo"
           >
             ↩️
           </button>
           <button
-            className="riff-wb-tool-btn icon-only"
             onClick={handleRedo}
             disabled={historyStep >= history.length - 1}
+            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-xs disabled:opacity-30 text-white"
             title="Redo"
           >
             ↪️
           </button>
           <button
-            className="riff-wb-tool-btn icon-only danger"
             onClick={handleClear}
+            className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs"
             title="Clear board"
           >
             🗑️
@@ -327,24 +333,23 @@ export default function Whiteboard({
         </div>
       </div>
 
-      {/* Canvas Area with Zoom Container */}
-      <div className="riff-wb-canvas-wrap">
+      {/* Canvas Area */}
+      <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#0A0710] shadow-inner">
         <canvas
           ref={canvasRef}
-          width={800}
-          height={400}
-          className="riff-wb-canvas"
+          width={900}
+          height={450}
+          className="w-full h-auto cursor-crosshair block"
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}
           onMouseLeave={stopDrawing}
-          aria-label="Interactive concept diagram canvas"
         />
 
         {textPos && (
           <div
-            className="riff-wb-text-popup"
-            style={{ left: `${(textPos.x / 800) * 100}%`, top: `${(textPos.y / 400) * 100}%` }}
+            className="absolute p-2 bg-[#0D0912] border border-white/20 rounded-xl shadow-2xl flex gap-2 z-20"
+            style={{ left: `${(textPos.x / 900) * 100}%`, top: `${(textPos.y / 450) * 100}%` }}
           >
             <input
               type="text"
@@ -353,11 +358,18 @@ export default function Whiteboard({
               autoFocus
               onChange={(e) => setTextInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleApplyText()}
+              className="px-3 py-1 bg-black/50 border border-white/20 rounded-lg text-xs text-white focus:outline-none focus:border-[#C084FC]"
             />
-            <button className="riff-btn-small accept" onClick={handleApplyText}>
+            <button
+              onClick={handleApplyText}
+              className="px-3 py-1 rounded-lg bg-white text-black text-xs font-semibold"
+            >
               Add
             </button>
-            <button className="riff-btn-small dismiss" onClick={() => setTextPos(null)}>
+            <button
+              onClick={() => setTextPos(null)}
+              className="px-2 py-1 text-white/50 hover:text-white text-xs"
+            >
               ✕
             </button>
           </div>
@@ -365,9 +377,9 @@ export default function Whiteboard({
       </div>
 
       {visualFeedback && (
-        <div className="riff-wb-feedback">
-          <span className="riff-input-label">💡 Riff's Diagram Feedback</span>
-          <p>{visualFeedback}</p>
+        <div className="p-4 rounded-2xl bg-[#7C3AED]/15 border border-[#9F67FF]/30 text-xs text-white/90">
+          <strong className="block text-[#C084FC] uppercase font-mono mb-1">💡 Riff's Visual Feedback:</strong>
+          {visualFeedback}
         </div>
       )}
     </div>

@@ -1,8 +1,9 @@
 // App.jsx
 // RIFF — Adaptive Neuro-Learning Engine
-// Redesigned with Orchid-inspired dark cinematic aesthetic,
-// full-screen video hero, serif typography, frosted-glass cards,
-// and real closed-loop adaptive neuro-learning telemetry.
+// Redesigned with Fluxora visual design principles:
+// Fullscreen /hero-loop.mp4 video, Instrument Serif display typography, centered pill navbar,
+// glassmorphism metric cards, ghost analytics telemetry, vertical guide lines,
+// and real closed-loop adaptive neuro-learning state.
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { evaluateUnderstanding } from "./understanding";
@@ -193,7 +194,6 @@ export default function App() {
 
   const modalityInsights = getModalityInsights(modalityProfile);
   const retentionStats = getRetentionStats(retentionStore);
-  const memoryHealth = getMemoryHealthOverview(retentionStore);
 
   // Central Adaptation Decision
   const adaptationDecision = decideAdaptation({
@@ -823,8 +823,8 @@ export default function App() {
   const letterSpacingMap = { normal: "0em", wide: "0.04em", extrawide: "0.09em" };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-indigo-500/30 selection:text-white flex flex-col justify-between">
-      {/* 1. FIXED FROSTED-GLASS NAVBAR */}
+    <div className="min-h-screen bg-[#07050B] text-white selection:bg-[#7C3AED]/30 selection:text-white flex flex-col justify-between">
+      {/* 1. FLUXORA CENTERED PILL NAVBAR */}
       <Navbar
         onNavigate={handleScrollToSection}
         activeSection={activeNav}
@@ -836,12 +836,10 @@ export default function App() {
         <Hero
           onStartLearning={() => handleScrollToSection("learn")}
           onExploreAdaptive={() => handleScrollToSection("adaptive-engine")}
-          onSelectFeature={(feat) => {
-            if (feat.includes("focus")) handleOpenFocusRoom();
-            else if (feat.includes("recall")) handleScrollToSection("recall");
-            else if (feat.includes("adapt")) handleScrollToSection("adaptive-engine");
-            else handleScrollToSection("learn");
-          }}
+          understandingConfidence={confidence}
+          retentionDueCount={retentionStats.due}
+          behaviorState={behaviorState}
+          currentModality={currentModality}
         />
       </div>
 
@@ -851,7 +849,7 @@ export default function App() {
       </div>
 
       {/* MAIN APPLICATION SECTIONS WRAPPER */}
-      <main className="max-w-7xl mx-auto px-6 sm:px-10 py-16 space-y-24 w-full">
+      <main className="max-w-7xl mx-auto px-6 sm:px-10 py-16 space-y-24 w-full bg-[#08070B]">
         {/* Error Banner */}
         {error && (
           <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
@@ -864,10 +862,10 @@ export default function App() {
         <section id="learn" className="space-y-8 scroll-mt-28">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-indigo-400 font-semibold px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
                 01 • Learning Workspace
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal mt-3">
+              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
                 What do you want to learn?
               </h2>
             </div>
@@ -879,7 +877,7 @@ export default function App() {
           {/* 2-Column Lesson & Adaptive Output */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Panel 1: Concept & Interest Input */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between shadow-xl">
+            <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl flex flex-col justify-between shadow-xl">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="font-mono text-xs text-white/70 uppercase tracking-wider font-semibold">
@@ -901,8 +899,8 @@ export default function App() {
                   rows={5}
                   value={lesson}
                   onChange={(e) => setLesson(e.target.value)}
-                  placeholder="Paste any concept, lesson, or problem here..."
-                  className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-indigo-400/60 transition-all resize-none leading-relaxed"
+                  placeholder="Explain binary search to me..."
+                  className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all resize-none leading-relaxed"
                 />
 
                 <div className="flex items-center justify-between mt-5 mb-2">
@@ -926,7 +924,7 @@ export default function App() {
                   value={interest}
                   onChange={(e) => setInterest(e.target.value)}
                   placeholder="Space exploration, Minecraft, Formula 1, dinosaurs, basketball..."
-                  className="w-full px-4 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-indigo-400/60 transition-all"
+                  className="w-full px-4 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all"
                 />
               </div>
 
@@ -934,11 +932,11 @@ export default function App() {
                 <button
                   onClick={handleRemix}
                   disabled={remixLoading || !lesson.trim() || !interest.trim()}
-                  className="w-full py-3.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase hover:bg-white/90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-300 shadow-xl shadow-white/10 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white font-semibold text-xs tracking-wider uppercase hover:opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-300 shadow-xl shadow-[#7C3AED]/20 flex items-center justify-center gap-2"
                 >
                   {remixLoading ? (
                     <>
-                      <span className="w-3.5 h-3.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
+                      <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
                       <span>Riffing & Adapting...</span>
                     </>
                   ) : (
@@ -961,7 +959,7 @@ export default function App() {
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-mono text-xs text-indigo-300 uppercase tracking-wider font-semibold">
+                  <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
                     2. Adaptive Remixed Lesson
                   </span>
                   {remix && (
@@ -973,7 +971,7 @@ export default function App() {
 
                 <div
                   className={`min-h-[160px] p-5 rounded-2xl bg-black/30 border border-white/[0.06] transition-all leading-relaxed ${
-                    neuroSettings.readingRuler ? "ring-2 ring-indigo-500/40" : ""
+                    neuroSettings.readingRuler ? "ring-2 ring-[#9F67FF]/40" : ""
                   }`}
                   style={{
                     fontFamily: fontObj.family,
@@ -985,14 +983,14 @@ export default function App() {
                 >
                   {remixLoading ? (
                     <div className="flex items-center gap-3 text-white/50 text-sm italic">
-                      <span className="w-4 h-4 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" />
+                      <span className="w-4 h-4 rounded-full border-2 border-[#C084FC] border-t-transparent animate-spin" />
                       <span>Reshaping academic structure around {interest}...</span>
                     </div>
                   ) : remix ? (
                     speechCharIndex >= 0 ? (
                       <span>
                         <span>{remix.slice(0, speechCharIndex)}</span>
-                        <mark className="bg-indigo-500/40 text-white rounded px-1">
+                        <mark className="bg-[#7C3AED]/40 text-white rounded px-1">
                           {remix.slice(speechCharIndex, speechCharIndex + 14)}
                         </mark>
                         <span>{remix.slice(speechCharIndex + 14)}</span>
@@ -1011,21 +1009,21 @@ export default function App() {
                 {remix && (
                   <div className="mt-4 pt-4 border-t border-white/[0.08]">
                     <span className="block text-[11px] font-mono text-white/50 uppercase mb-2">
-                      Explain this concept as:
+                      Try:
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {[
-                        { id: "text", label: "📄 Simple Text" },
-                        { id: "visual", label: "🎨 Visual Model" },
-                        { id: "analogy", label: "🌉 Bridge Analogy" },
-                        { id: "audio", label: "🔊 Audio Read" },
+                        { id: "visual", label: "🎨 Visual" },
+                        { id: "analogy", label: "🌉 Analogy" },
+                        { id: "text", label: "📄 Simple" },
+                        { id: "interactive", label: "🎮 Interactive" },
                       ].map((m) => (
                         <button
                           key={m.id}
                           onClick={() => handleExplainThreeWays(m.id)}
                           className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
                             currentModality === m.id
-                              ? "bg-indigo-500 text-white border-indigo-400"
+                              ? "bg-[#7C3AED] text-white border-[#9F67FF]"
                               : "bg-white/[0.04] border-white/10 text-white/70 hover:text-white hover:bg-white/10"
                           }`}
                         >
@@ -1084,10 +1082,10 @@ export default function App() {
           </div>
 
           {/* Practice Scratchpad & Real-Time Observer */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl space-y-6 shadow-xl">
+          <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl space-y-6 shadow-xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <span className="font-mono text-xs text-indigo-300 uppercase tracking-wider font-semibold">
+                <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
                   3. Practice & Thinking Scratchpad
                 </span>
                 <p className="text-xs text-white/50 mt-1">
@@ -1113,7 +1111,7 @@ export default function App() {
               onChange={(e) => setScratch(e.target.value)}
               onKeyDown={handleScratchKeyDown}
               placeholder="Start typing your explanation or solution. Riff observes interaction friction and will offer support if you get stuck..."
-              className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-indigo-400/60 transition-all resize-none leading-relaxed"
+              className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all resize-none leading-relaxed"
             />
 
             {/* Live Pacing Waveform */}
@@ -1127,7 +1125,7 @@ export default function App() {
                       className="w-1.5 rounded-full transition-all duration-150"
                       style={{
                         height: `${h}px`,
-                        backgroundColor: behaviorState.isFrictionDetected ? "#f43f5e" : "#10b981",
+                        backgroundColor: behaviorState.isFrictionDetected ? "#F43F5E" : "#10B981",
                       }}
                     />
                   ))}
@@ -1163,7 +1161,7 @@ export default function App() {
               <button
                 onClick={handleHintRequest}
                 disabled={hintLoading}
-                className="text-xs font-mono text-indigo-300 hover:text-indigo-200 underline"
+                className="text-xs font-mono text-[#C084FC] hover:text-white underline"
               >
                 {hintLoading ? "Thinking..." : "💡 Need a hint?"}
               </button>
@@ -1171,7 +1169,7 @@ export default function App() {
 
             {/* STUCK RESCUE FLOW BANNER */}
             {alertState === "offered" && (
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-rose-950/40 via-purple-950/40 to-slate-900/40 border border-rose-500/40 backdrop-blur-xl">
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-rose-950/40 via-purple-950/40 to-[#0D0912] border border-rose-500/40 backdrop-blur-xl">
                 <div className="flex items-center gap-2 text-rose-300 text-xs font-mono uppercase tracking-wider font-bold mb-2">
                   <span>⚠️</span> Riff noticed friction in your pacing
                 </div>
@@ -1220,16 +1218,16 @@ export default function App() {
             {(confidence !== null || simpler || quiz || alertState === "hinted") && (
               <div className="space-y-4 pt-4 border-t border-white/[0.08]">
                 {alertState === "hinted" && (
-                  <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 text-sm text-indigo-200">
-                    <strong className="block text-xs font-mono uppercase text-indigo-400 mb-1">Focused Hint</strong>
+                  <div className="p-4 rounded-2xl bg-[#7C3AED]/20 border border-[#9F67FF]/30 text-sm text-[#C084FC]">
+                    <strong className="block text-xs font-mono uppercase text-[#C084FC] mb-1">Focused Hint</strong>
                     {hintLoading ? "Formulating hint..." : hint}
                   </div>
                 )}
 
                 {confidence !== null && (
-                  <div className="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-2">
+                  <div className="p-5 rounded-2xl bg-[#7C3AED]/15 border border-[#9F67FF]/30 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono uppercase text-emerald-400 font-bold">
+                      <span className="text-xs font-mono uppercase text-[#C084FC] font-bold">
                         Understanding Assessment
                       </span>
                       <span className="font-mono text-sm font-bold text-white">
@@ -1238,7 +1236,7 @@ export default function App() {
                     </div>
                     <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full transition-all duration-700"
+                        className="h-full bg-gradient-to-r from-[#7C3AED] to-[#10B981] rounded-full transition-all duration-700"
                         style={{ width: `${Math.round(confidence * 100)}%` }}
                       />
                     </div>
@@ -1266,11 +1264,11 @@ export default function App() {
           {/* Multimodal Teach Riff & AI Lab */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Teach Riff Card */}
-            <div className="lg:col-span-2 p-6 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl space-y-4 shadow-xl">
+            <div className="lg:col-span-2 p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl space-y-4 shadow-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-mono text-xs text-indigo-300 uppercase tracking-wider font-semibold">
-                    4. Teach Riff (Reverse Tutoring)
+                  <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
+                    Now teach it back. You explain. Riff listens.
                   </span>
                   <p className="text-xs text-white/50 mt-0.5">
                     Explain the concept in your own words to verify your mental model.
@@ -1286,7 +1284,7 @@ export default function App() {
                       }}
                       className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all ${
                         teachMode === mode
-                          ? "bg-indigo-500 text-white"
+                          ? "bg-[#7C3AED] text-white"
                           : "text-white/60 hover:text-white"
                       }`}
                     >
@@ -1301,14 +1299,14 @@ export default function App() {
                 value={teachExplanation}
                 onChange={(e) => setTeachExplanation(e.target.value)}
                 placeholder={`Teach this concept in your own words to a friendly buddy from ${interest || "your world"}...`}
-                className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-indigo-400/60 transition-all resize-none leading-relaxed"
+                className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all resize-none leading-relaxed"
               />
 
               <div className="flex items-center justify-between">
                 <button
                   onClick={handleTeachback}
                   disabled={!teachExplanation.trim() || teachbackLoading}
-                  className="px-5 py-2.5 rounded-full bg-white text-black font-semibold text-xs uppercase tracking-wider hover:bg-white/90 disabled:opacity-40 transition-all shadow-lg"
+                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white font-semibold text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-40 transition-all shadow-lg shadow-[#7C3AED]/20"
                 >
                   {teachbackLoading ? "Listening & Assessing..." : "Teach It to Riff"}
                 </button>
@@ -1327,34 +1325,34 @@ export default function App() {
                 <div className="mt-4 p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2">
                   <div className="flex items-center justify-between text-xs font-semibold">
                     <span className="text-white">What Riff Heard:</span>
-                    <span className="text-emerald-400 font-mono">{teachRubric.confidenceScore}% Learning Confidence</span>
+                    <span className="text-[#10B981] font-mono">{teachRubric.confidenceScore}% Learning Confidence</span>
                   </div>
                   <ul className="text-xs space-y-1 text-white/80">
-                    <li className="text-emerald-300">✓ Core concept clearly articulated</li>
+                    <li className="text-emerald-300">✓ Core idea clearly stated</li>
                     <li className={teachRubric.relationship ? "text-emerald-300" : "text-amber-300"}>
-                      {teachRubric.relationship ? "✓" : "△"} Key relationships connected
+                      {teachRubric.relationship ? "✓" : "△"} Relationship connected
                     </li>
                     <li className={teachRubric.exampleIncluded ? "text-emerald-300" : "text-amber-300"}>
-                      {teachRubric.exampleIncluded ? "✓" : "△"} Concrete examples applied
+                      {teachRubric.exampleIncluded ? "✓" : "△"} Example applied
                     </li>
                     {teachRubric.missingDetail && (
-                      <li className="text-indigo-300">💡 {teachRubric.missingDetail}</li>
+                      <li className="text-[#C084FC]">💡 {teachRubric.missingDetail}</li>
                     )}
                   </ul>
                 </div>
               )}
 
               {teachback && (
-                <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 text-xs text-indigo-200 leading-relaxed italic">
+                <div className="p-4 rounded-2xl bg-[#7C3AED]/15 border border-[#9F67FF]/30 text-xs text-[#C084FC] leading-relaxed italic">
                   “{teachback.reaction}” {teachback.question}
                 </div>
               )}
             </div>
 
             {/* AI Lab: Debug My Thinking */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl space-y-4 shadow-xl flex flex-col justify-between">
+            <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl space-y-4 shadow-xl flex flex-col justify-between">
               <div>
-                <span className="font-mono text-xs text-indigo-300 uppercase tracking-wider font-semibold">
+                <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
                   Debug My Thinking
                 </span>
                 <p className="text-xs text-white/50 mt-1">
@@ -1401,15 +1399,15 @@ export default function App() {
           </div>
         </section>
 
-        {/* SECTION 2: ADAPTIVE ENGINE HUB (Hero of the Application) */}
+        {/* SECTION 2: ADAPTIVE ENGINE HUB */}
         <section id="adaptive-engine" className="space-y-8 scroll-mt-28">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-indigo-400 font-semibold px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
                 02 • Central Intelligence
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal mt-3">
-                Riff Adaptive Engine
+              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
+                Riff doesn't just teach. It adapts.
               </h2>
             </div>
             <p className="text-xs text-white/50 max-w-md font-light">
@@ -1440,10 +1438,10 @@ export default function App() {
         <section id="riffboard" className="space-y-8 scroll-mt-28">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-indigo-400 font-semibold px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
                 03 • Creative Canvas
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal mt-3">
+              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
                 Smart RiffBoard Workspace
               </h2>
             </div>
@@ -1466,11 +1464,11 @@ export default function App() {
         <section id="recall" className="space-y-8 scroll-mt-28">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-indigo-400 font-semibold px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
                 04 • Spaced Memory
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal mt-3">
-                Smart Spaced Retention
+              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
+                Remember what you learned.
               </h2>
             </div>
             <p className="text-xs text-white/50 max-w-md font-light">
@@ -1490,10 +1488,10 @@ export default function App() {
         <section id="dna" className="space-y-8 scroll-mt-28">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-indigo-400 font-semibold px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
                 05 • Learner Profile
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal mt-3">
+              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
                 Your Learning DNA
               </h2>
             </div>
@@ -1515,17 +1513,17 @@ export default function App() {
         <section id="timeline" className="space-y-8 scroll-mt-28">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
             <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-indigo-400 font-semibold px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
                 06 • Telemetry & History
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl text-white font-normal mt-3">
+              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
                 Learning Journey & Timeline
               </h2>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setDemoModeOpen(true)}
-                className="px-4 py-1.5 rounded-full bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/40 text-xs font-semibold text-indigo-300 transition-all backdrop-blur-md"
+                className="px-4 py-1.5 rounded-full bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border border-[#9F67FF]/40 text-xs font-semibold text-[#C084FC] transition-all backdrop-blur-md"
               >
                 ⚖️ Open Judge Demo Mode
               </button>
@@ -1581,10 +1579,11 @@ export default function App() {
       />
 
       {/* FOOTER */}
-      <footer className="border-t border-white/[0.08] mt-24 py-12 px-6 sm:px-12 bg-black/50 backdrop-blur-md">
+      <footer className="border-t border-white/[0.08] mt-24 py-12 px-6 sm:px-12 bg-black/60 backdrop-blur-md">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
           <div className="flex items-center gap-2">
-            <span className="font-serif text-base font-bold text-white">Riff<span className="text-indigo-400">.</span></span>
+            <span className="font-display text-base font-bold text-white">RIFF</span>
+            <span className="text-[#9F67FF]">•</span>
             <span>Adaptive Neuro-Learning Engine</span>
           </div>
           <span>

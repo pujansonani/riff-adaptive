@@ -1,169 +1,153 @@
 // FocusRoom.jsx
-// Riff Focus Room: Fullscreen, distraction-free single-task focus environment.
+// Immersive, de-cluttered single-instruction focus room with large typography and rescue shortcuts.
 
-import { useState, useEffect } from "react";
-import { isSpeechSupported, speak, stopSpeaking } from "./speech";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { speak, isSpeechSupported } from "./speech.js";
 
 export default function FocusRoom({
   isOpen,
   onClose,
   lesson = "",
   interest = "",
-  steps = [],
+  steps = "",
   onImStuck,
   onSwitchModality,
 }) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState(new Set());
-  const [isNarrating, setIsNarrating] = useState(false);
-
-  const stepList = Array.isArray(steps) && steps.length > 0
-    ? steps
-    : typeof steps === "string" && steps.trim()
-    ? steps.split(/\n+/).filter((s) => s.trim().length > 0)
-    : [
-        `Identify the core question in ${interest || "the concept"}.`,
-        "Write down what you already know in one simple phrase.",
-        "Notice the relationship between the parts and whole.",
-        "Apply the concept to a real-world example.",
-      ];
-
-  const currentStep = stepList[currentStepIndex] || stepList[0];
-  const progressPct = Math.round(((currentStepIndex + 1) / stepList.length) * 100);
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!isOpen) return;
-      if (e.key === "Escape") {
-        stopSpeaking();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const [currentStepIdx, setCurrentStepIdx] = useState(0);
 
   if (!isOpen) return null;
 
-  const handleHearStep = () => {
-    if (isNarrating) {
-      stopSpeaking();
-      setIsNarrating(false);
-      return;
-    }
-    setIsNarrating(true);
-    speak(currentStep, () => setIsNarrating(false));
-  };
+  // Split steps text into clean array
+  const stepList = steps
+    ? steps
+        .split(/\n+/)
+        .map((s) => s.replace(/^\d+[\.\)]\s*/, "").trim())
+        .filter(Boolean)
+    : [
+        `Understand the core concept of ${interest || "the problem"}.`,
+        "Identify how each part connects together.",
+        "Solve the primary step and test your intuition.",
+      ];
 
-  const handleUnderstandStep = () => {
-    setCompletedSteps((prev) => new Set([...prev, currentStepIndex]));
-    if (currentStepIndex < stepList.length - 1) {
-      setCurrentStepIndex((prev) => prev + 1);
-    } else {
-      stopSpeaking();
-      onClose();
-    }
-  };
+  const currentStepText = stepList[currentStepIdx] || stepList[0];
+  const totalSteps = stepList.length;
 
-  const handleStuckClick = () => {
-    stopSpeaking();
-    if (onImStuck) {
-      onImStuck({ stepIndex: currentStepIndex, stepText: currentStep });
+  const handleReadStep = () => {
+    if (isSpeechSupported()) {
+      speak(currentStepText);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#050505]/90 backdrop-blur-2xl flex items-center justify-center p-6">
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-2xl p-8 rounded-3xl bg-[#0c0c10] border border-white/15 shadow-2xl shadow-black relative flex flex-col justify-between min-h-[460px]"
-      >
-        {/* Top bar */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-indigo-400 font-bold px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-              RIFF FOCUS ROOM
-            </span>
-            <span className="font-mono text-xs text-white/50">
-              Step {currentStepIndex + 1} of {stepList.length}
-            </span>
-            <button
-              onClick={onClose}
-              className="text-xs text-white/40 hover:text-white px-3 py-1 rounded-full bg-white/[0.05]"
-            >
-              Exit (Esc)
-            </button>
-          </div>
-
-          {/* Progress track */}
-          <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mb-8">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-
-          {/* Micro-Step Card */}
-          <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 mb-6">
-            <span className="font-mono text-xs text-indigo-400 font-bold block mb-2">
-              STEP {currentStepIndex + 1}
-            </span>
-            <h2 className="font-serif text-2xl sm:text-3xl text-white font-normal leading-snug mb-6">
-              {currentStep}
-            </h2>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleHearStep}
-                disabled={!isSpeechSupported()}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                  isNarrating
-                    ? "bg-rose-500 text-white border-rose-400"
-                    : "bg-white/5 hover:bg-white/10 border-white/10 text-white/80"
-                }`}
-              >
-                {isNarrating ? "⏹ Stop Audio" : "🔊 Hear It"}
-              </button>
-              <button
-                onClick={() => {
-                  stopSpeaking();
-                  onClose();
-                  onSwitchModality("whiteboard");
-                }}
-                className="px-4 py-1.5 rounded-full text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-white/80"
-              >
-                🎨 Draw It on Canvas
-              </button>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 bg-[#07050B]/95 backdrop-blur-3xl flex flex-col justify-between p-6 sm:p-12 overflow-y-auto">
+      {/* Top Bar */}
+      <div className="max-w-4xl mx-auto w-full flex items-center justify-between pb-6 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#C084FC] font-bold px-3 py-1 rounded-full bg-[#7C3AED]/20 border border-[#9F67FF]/30">
+            RIFF FOCUS ROOM
+          </span>
+          <span className="text-xs font-mono text-white/50">
+            Step {currentStepIdx + 1} of {totalSteps}
+          </span>
         </div>
+
+        <button
+          onClick={onClose}
+          className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all"
+        >
+          Exit Focus ✕
+        </button>
+      </div>
+
+      {/* Center Main Step Presentation with huge typography */}
+      <div className="max-w-3xl mx-auto w-full my-auto py-12 flex flex-col items-start">
+        {/* Progress Bar */}
+        <div className="w-full h-1.5 bg-white/10 rounded-full mb-10 overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-[#7C3AED] to-[#47BFFF] rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${((currentStepIdx + 1) / totalSteps) * 100}%` }}
+            transition={{ duration: 0.4 }}
+          />
+        </div>
+
+        <motion.div
+          key={currentStepIdx}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6 w-full"
+        >
+          <span className="text-xs font-mono uppercase tracking-widest text-white/40">
+            Current Micro-Step
+          </span>
+          <h2 className="font-display text-3xl sm:text-5xl font-semibold text-white leading-snug">
+            {currentStepText}
+          </h2>
+        </motion.div>
 
         {/* Action Controls */}
-        <div>
-          <div className="flex items-center justify-between gap-4 pt-4 border-t border-white/10">
-            <button
-              onClick={handleStuckClick}
-              className="px-5 py-2.5 rounded-full bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold transition-all"
-            >
-              🤔 I'm stuck on this
-            </button>
-            <button
-              onClick={handleUnderstandStep}
-              className="px-6 py-2.5 rounded-full bg-white text-black text-xs font-semibold hover:bg-white/90 shadow-xl shadow-white/10 transition-all active:scale-95"
-            >
-              {currentStepIndex < stepList.length - 1 ? "✓ I understand, next step →" : "🎉 Complete & return"}
-            </button>
-          </div>
-          <div className="flex justify-between items-center text-[10px] text-white/30 font-mono mt-3">
-            <span>{progressPct}% completed</span>
-            <span>Tip: Take it one step at a time.</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 mt-12">
+          <button
+            onClick={handleReadStep}
+            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-white border border-white/15 transition-all flex items-center gap-2"
+          >
+            <span>🔊</span> Hear it
+          </button>
+
+          <button
+            onClick={() => {
+              if (onSwitchModality) onSwitchModality("whiteboard");
+            }}
+            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-white border border-white/15 transition-all flex items-center gap-2"
+          >
+            <span>🎨</span> Draw it
+          </button>
+
+          <button
+            onClick={() => {
+              if (currentStepIdx < totalSteps - 1) {
+                setCurrentStepIdx(currentStepIdx + 1);
+              } else {
+                onClose();
+              }
+            }}
+            className="px-6 py-2.5 rounded-full bg-white text-black font-semibold text-xs hover:bg-white/90 transition-all shadow-lg"
+          >
+            {currentStepIdx < totalSteps - 1 ? "I understand → Next Step" : "Complete Step Room ✓"}
+          </button>
+
+          <button
+            onClick={() => {
+              if (onImStuck) onImStuck({ stepIndex: currentStepIdx, stepText: currentStepText });
+            }}
+            className="px-5 py-2.5 rounded-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-400/40 text-xs font-semibold transition-all"
+          >
+            ⚠️ I'm stuck
+          </button>
         </div>
-      </motion.div>
+      </div>
+
+      {/* Bottom Step Indicator */}
+      <div className="max-w-4xl mx-auto w-full pt-6 border-t border-white/10 flex items-center justify-between text-xs text-white/40">
+        <span>Single-instruction focus view eliminates distraction and cognitive overwhelm.</span>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setCurrentStepIdx(Math.max(0, currentStepIdx - 1))}
+            disabled={currentStepIdx === 0}
+            className="px-3 py-1 rounded bg-white/5 disabled:opacity-30 hover:bg-white/10 text-white"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => setCurrentStepIdx(Math.min(totalSteps - 1, currentStepIdx + 1))}
+            disabled={currentStepIdx === totalSteps - 1}
+            className="px-3 py-1 rounded bg-white/5 disabled:opacity-30 hover:bg-white/10 text-white"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

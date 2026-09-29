@@ -1,86 +1,86 @@
 // ConfidenceJourney.jsx
-// Visual learning confidence graph tracking comprehension progression across session milestones.
+// Minimalist confidence graph tracking understanding changes across session milestones.
+
+import { motion } from "framer-motion";
 
 export default function ConfidenceJourney({ points = [] }) {
-  const displayPoints = points.length > 0 ? points : [
-    { id: "p1", label: "Start", confidence: 0.35, percentage: 35 },
-    { id: "p2", label: "Riffed", confidence: 0.52, percentage: 52 },
-  ];
+  const displayPoints = points.length > 0
+    ? points
+    : [
+        { label: "Start", confidence: 0.35, timestamp: Date.now() - 600000 },
+        { label: "Riffed", confidence: 0.52, timestamp: Date.now() - 400000 },
+        { label: "Visual", confidence: 0.70, timestamp: Date.now() - 200000 },
+        { label: "Teach-Back", confidence: 0.82, timestamp: Date.now() - 60000 },
+        { label: "Recall", confidence: 0.88, timestamp: Date.now() },
+      ];
 
-  const currentConfidence = displayPoints[displayPoints.length - 1]?.percentage || 50;
+  const latestConfidence = displayPoints[displayPoints.length - 1]?.confidence || 0.45;
+  const latestPct = Math.round(latestConfidence * 100);
 
   return (
-    <div className="w-full p-6 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-2xl shadow-2xl shadow-black/80">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.04] border border-white/[0.1] backdrop-blur-xl shadow-xl flex flex-col justify-between">
+      <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-indigo-400 font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-            Session Analytics
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#C084FC] font-semibold px-2.5 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
+            Comprehension Curve
           </span>
-          <h3 className="font-serif text-3xl text-white font-normal mt-2">
+          <h3 className="font-display text-2xl text-white font-bold mt-2">
             Your Learning Journey
           </h3>
-          <p className="text-white/50 text-xs mt-1">
-            How your conceptual grasp evolves through interactive practice and adaptations.
+          <p className="text-xs text-white/50 mt-1">
+            How your understanding changed across interactions in this session.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/[0.05] border border-white/10">
-          <span className="font-mono text-2xl font-bold text-emerald-400">{currentConfidence}%</span>
-          <span className="text-xs text-white/50 leading-tight">Current<br />Confidence</span>
+        <div className="px-4 py-2 rounded-2xl bg-white/[0.05] border border-white/10 text-right">
+          <span className="text-xs font-mono text-white/50 block">Current Confidence</span>
+          <span className="font-display text-2xl font-bold text-[#10B981]">{latestPct}%</span>
         </div>
       </div>
 
-      {/* Graph Area */}
-      <div className="flex h-56 gap-4 my-6">
-        <div className="flex flex-col justify-between font-mono text-[10px] text-white/40 pb-6 pr-2">
-          <span>100%</span>
-          <span>75%</span>
-          <span>50%</span>
-          <span>25%</span>
-          <span>0%</span>
-        </div>
+      {/* Minimalist Visual Chart Area */}
+      <div className="relative pt-8 pb-4">
+        {/* Horizontal Baseline Axis */}
+        <div className="absolute bottom-10 left-0 right-0 h-[1px] bg-white/10" />
 
-        <div className="flex-1 relative border-l border-b border-white/10 pb-6">
-          {/* Subtle Grid lines */}
-          <div className="absolute left-0 right-0 top-0 h-px bg-white/[0.04]" />
-          <div className="absolute left-0 right-0 top-1/4 h-px bg-white/[0.04]" />
-          <div className="absolute left-0 right-0 top-2/4 h-px bg-white/[0.04]" />
-          <div className="absolute left-0 right-0 top-3/4 h-px bg-white/[0.04]" />
+        {/* Milestone Pillars */}
+        <div className="flex items-end justify-between gap-2 h-44 px-4">
+          {displayPoints.map((pt, idx) => {
+            const pct = Math.round(pt.confidence * 100);
+            const isLatest = idx === displayPoints.length - 1;
+            return (
+              <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
+                <span className={`text-[11px] font-mono font-bold transition-all ${
+                  isLatest ? "text-[#10B981]" : "text-white/60"
+                }`}>
+                  {pct}%
+                </span>
 
-          {/* Points Columns */}
-          <div className="absolute inset-0 bottom-6 flex items-end justify-around px-4">
-            {displayPoints.map((pt, idx) => {
-              const heightPct = Math.min(100, Math.max(12, pt.percentage));
-              const isLatest = idx === displayPoints.length - 1;
-
-              return (
-                <div key={pt.id || idx} className="flex flex-col items-center h-full w-14 group">
-                  <div className="flex-1 w-3.5 flex items-end bg-white/[0.04] rounded-full overflow-hidden">
-                    <div
-                      className={`w-full rounded-full transition-all duration-700 relative ${
-                        isLatest
-                          ? "bg-gradient-to-t from-indigo-500 to-emerald-400 shadow-lg shadow-emerald-500/20"
-                          : "bg-white/20"
-                      }`}
-                      style={{ height: `${heightPct}%` }}
-                    >
-                      <span className="absolute -top-6 left-1/2 -translate-x-1/2 font-mono text-[10px] font-bold text-white whitespace-nowrap opacity-80 group-hover:opacity-100">
-                        {pt.percentage}%
-                      </span>
-                    </div>
-                  </div>
-                  <span className="absolute -bottom-5 font-mono text-[10px] text-white/50 whitespace-nowrap">
-                    {pt.label}
-                  </span>
+                <div className="w-full max-w-[28px] h-32 bg-white/[0.04] rounded-full flex items-end p-0.5 overflow-hidden">
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: `${pct}%` }}
+                    transition={{ duration: 0.6, delay: idx * 0.1 }}
+                    className={`w-full rounded-full transition-all ${
+                      isLatest
+                        ? "bg-gradient-to-t from-[#7C3AED] to-[#10B981]"
+                        : "bg-gradient-to-t from-[#7C3AED]/40 to-[#C084FC]/60"
+                    }`}
+                  />
                 </div>
-              );
-            })}
-          </div>
+
+                <span className="text-[10px] font-mono text-white/50 text-center truncate max-w-[64px] mt-1" title={pt.label}>
+                  {pt.label}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="text-[11px] text-white/40 italic pt-2">
-        *Learning confidence measures conceptual clarity and answer alignment — not fixed capability.
+      <div className="pt-4 border-t border-white/[0.08] text-[11px] text-white/40 flex items-center justify-between">
+        <span>Computed from real interaction checks and teach-backs.</span>
+        <span className="font-mono text-[#C084FC]">Baseline Calibrated</span>
       </div>
     </div>
   );

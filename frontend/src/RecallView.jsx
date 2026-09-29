@@ -1,5 +1,5 @@
 // RecallView.jsx
-// Memory & Retention Engine Component with dark cinematic cards.
+// Memory & Retention Engine Component with Fluxora dark glass cards.
 
 import { useState } from "react";
 import {
@@ -39,14 +39,14 @@ export default function RecallView({
   };
 
   return (
-    <div className="w-full p-6 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-2xl shadow-2xl shadow-black/80">
+    <div className="w-full p-6 sm:p-8 rounded-3xl bg-white/[0.04] border border-white/[0.1] backdrop-blur-2xl shadow-2xl shadow-black/80">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-indigo-400 font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-            Memory & Spaced Retrieval
+          <span className="font-mono text-[10px] uppercase tracking-widest text-[#C084FC] font-semibold px-2.5 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
+            Memory & Retention
           </span>
-          <h3 className="font-serif text-3xl text-white font-normal mt-2">
-            RiffRecall Engine
+          <h3 className="font-display text-2xl sm:text-3xl text-white font-bold mt-2">
+            Remember what you learned.
           </h3>
           <p className="text-white/50 text-xs mt-1">
             Active recall intervals dynamically adjusted based on retention performance (5m → 1d → 3d → 7d → 14d).
@@ -66,7 +66,7 @@ export default function RecallView({
           </div>
           <div className="w-px h-6 bg-white/10" />
           <div className="text-center px-2">
-            <span className="font-mono text-base font-bold text-indigo-300 block">{memoryHealth.growingCount}</span>
+            <span className="font-mono text-base font-bold text-[#C084FC] block">{memoryHealth.growingCount}</span>
             <span className="font-mono text-[9px] uppercase text-white/40">Growing</span>
           </div>
         </div>
@@ -134,44 +134,50 @@ export default function RecallView({
                 onClick={() => setIsFlipped(!isFlipped)}
                 className={`w-full h-72 rounded-3xl p-8 border transition-all duration-500 cursor-pointer relative shadow-2xl flex flex-col justify-between select-none ${
                   isFlipped
-                    ? "bg-gradient-to-br from-emerald-950/40 via-[#0d1612] to-[#070b09] border-emerald-400/50 shadow-emerald-500/10"
+                    ? "bg-gradient-to-br from-[#7C3AED]/25 via-[#0D0912] to-[#07050B] border-[#9F67FF]/50 shadow-[#7C3AED]/10"
                     : "bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-transparent border-white/15"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-indigo-300 font-bold px-2.5 py-1 rounded bg-white/10">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#C084FC] font-bold px-2.5 py-1 rounded bg-white/10">
                     {currentCard.concept || "Key Idea"}
                   </span>
-                  <span className="font-mono text-[10px] text-white/40">Tap to flip ↻</span>
+                  <span className="font-mono text-[10px] text-white/40">Tap to reveal ↻</span>
                 </div>
 
-                <div className="text-center font-serif text-2xl text-white font-normal leading-relaxed my-auto">
+                <div className="text-center font-display text-2xl text-white font-medium leading-relaxed my-auto">
                   {isFlipped ? currentCard.back : currentCard.front}
                 </div>
 
                 {isFlipped && currentCard.hint && (
-                  <div className="text-xs text-emerald-300/80 bg-emerald-950/40 border border-emerald-500/20 p-2.5 rounded-xl text-center">
+                  <div className="text-xs text-[#C084FC]/90 bg-[#7C3AED]/15 border border-[#9F67FF]/20 p-2.5 rounded-xl text-center">
                     💡 {currentCard.hint}
                   </div>
                 )}
               </div>
 
-              {/* Recall Self-Assessment Buttons */}
+              {/* Recall Self-Assessment Buttons (Again, Almost, Got It) */}
               {isFlipped && (
                 <div className="mt-6 flex flex-col items-center gap-3">
-                  <span className="text-xs text-white/50">How well did you recall this concept?</span>
+                  <span className="text-xs text-white/50">How well did you remember?</span>
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleCardOutcome(false, 0.3)}
+                      onClick={() => handleCardOutcome(false, 0.2)}
                       className="px-5 py-2 rounded-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-semibold"
                     >
-                      🤔 Still Learning (Review in 5m)
+                      Again (5m)
                     </button>
                     <button
-                      onClick={() => handleCardOutcome(true, 0.9)}
-                      className="px-5 py-2 rounded-full bg-emerald-500 text-black text-xs font-semibold hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
+                      onClick={() => handleCardOutcome(true, 0.6)}
+                      className="px-5 py-2 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-semibold"
                     >
-                      🎯 Got It! (Advance Spacing)
+                      Almost (1d)
+                    </button>
+                    <button
+                      onClick={() => handleCardOutcome(true, 0.95)}
+                      className="px-5 py-2 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white text-xs font-semibold hover:opacity-90 shadow-lg shadow-[#7C3AED]/20"
+                    >
+                      Got It! (3d)
                     </button>
                   </div>
                 </div>
@@ -193,7 +199,7 @@ export default function RecallView({
               { level: 4, label: "14 Days", desc: "Mastered" },
             ].map((slot) => (
               <div key={slot.level} className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-center">
-                <span className="font-mono text-xs font-bold text-indigo-400 block">L{slot.level}</span>
+                <span className="font-mono text-xs font-bold text-[#C084FC] block">L{slot.level}</span>
                 <strong className="text-xs text-white block mt-1">{slot.label}</strong>
                 <span className="text-[10px] text-white/40">{slot.desc}</span>
               </div>
@@ -233,7 +239,7 @@ export default function RecallView({
         <div className="space-y-4">
           {(cards.length > 0 ? cards.slice(0, 3) : dueCards.slice(0, 3)).map((card, idx) => (
             <div key={card.id} className="p-4 rounded-2xl bg-white/[0.03] border border-white/10">
-              <span className="font-mono text-[10px] uppercase text-indigo-400 font-bold block mb-1">
+              <span className="font-mono text-[10px] uppercase text-[#C084FC] font-bold block mb-1">
                 Question {idx + 1}
               </span>
               <p className="text-sm font-semibold text-white mb-2">{card.front}</p>
@@ -242,10 +248,10 @@ export default function RecallView({
                 placeholder="Write what you remember..."
                 value={quizAnswers[card.id] || ""}
                 onChange={(e) => setQuizAnswers({ ...quizAnswers, [card.id]: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/15 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-400"
+                className="w-full bg-white/[0.04] border border-white/15 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C084FC]"
               />
               {quizSubmitted && (
-                <div className="mt-2 text-xs text-emerald-300 bg-emerald-950/30 p-2.5 rounded-lg border border-emerald-500/20">
+                <div className="mt-2 text-xs text-[#C084FC] bg-[#7C3AED]/20 p-2.5 rounded-lg border border-[#9F67FF]/30">
                   <strong>Expected Answer:</strong> {card.back}
                 </div>
               )}
