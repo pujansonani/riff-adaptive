@@ -1,5 +1,6 @@
 // RecallView.jsx
-// Memory & Retention Engine Component with Fluxora dark glass cards.
+// Friendly "Can You Remember?" memory game for kids & teens.
+// Uses gentle encouragement: "I know it", "Almost", "Not yet".
 
 import { useState } from "react";
 import {
@@ -39,145 +40,145 @@ export default function RecallView({
   };
 
   return (
-    <div className="w-full p-6 sm:p-8 rounded-3xl bg-white/[0.04] border border-white/[0.1] backdrop-blur-2xl shadow-2xl shadow-black/80">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div className="w-full p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[#C084FC] font-semibold px-2.5 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-            Memory & Retention
+          <span className="text-xs font-bold uppercase tracking-wide text-[#FF5E7E] px-3 py-1 rounded-full bg-[#FFE0E5]">
+            🧠 MEMORY BUDDY
           </span>
-          <h3 className="font-display text-2xl sm:text-3xl text-white font-bold mt-2">
-            Remember what you learned.
+          <h3 className="font-display text-2xl sm:text-3xl font-bold text-[#263238] mt-2">
+            Can You Remember?
           </h3>
-          <p className="text-white/50 text-xs mt-1">
-            Active recall intervals dynamically adjusted based on retention performance (5m → 1d → 3d → 7d → 14d).
+          <p className="text-[#546E7A] text-xs sm:text-sm mt-1">
+            Quick fun check-ins to make sure ideas stick in your brain!
           </p>
         </div>
 
-        {/* Memory Health Overview Pill */}
-        <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.04] border border-white/10">
-          <div className="text-center px-2">
-            <span className="font-mono text-base font-bold text-rose-400 block">{stats.due}</span>
-            <span className="font-mono text-[9px] uppercase text-white/40">Due Now</span>
+        {/* Friendly Overview Badges */}
+        <div className="flex items-center gap-2 p-2 rounded-2xl bg-[#FFF9F0] border border-[#E8DEFF]">
+          <div className="px-3 py-1 bg-white rounded-xl shadow-sm text-center">
+            <span className="font-display text-base font-bold text-[#2EC4B6] block">{memoryHealth.strongCount}</span>
+            <span className="text-[10px] font-bold text-[#546E7A]">Nailed It!</span>
           </div>
-          <div className="w-px h-6 bg-white/10" />
-          <div className="text-center px-2">
-            <span className="font-mono text-base font-bold text-emerald-400 block">{memoryHealth.strongCount}</span>
-            <span className="font-mono text-[9px] uppercase text-white/40">Strong</span>
+          <div className="px-3 py-1 bg-white rounded-xl shadow-sm text-center">
+            <span className="font-display text-base font-bold text-[#FFB84D] block">{memoryHealth.growingCount}</span>
+            <span className="text-[10px] font-bold text-[#546E7A]">Growing</span>
           </div>
-          <div className="w-px h-6 bg-white/10" />
-          <div className="text-center px-2">
-            <span className="font-mono text-base font-bold text-[#C084FC] block">{memoryHealth.growingCount}</span>
-            <span className="font-mono text-[9px] uppercase text-white/40">Growing</span>
+          <div className="px-3 py-1 bg-white rounded-xl shadow-sm text-center">
+            <span className="font-display text-base font-bold text-[#FF5E7E] block">{stats.due}</span>
+            <span className="text-[10px] font-bold text-[#546E7A]">Ready to Play</span>
           </div>
         </div>
       </div>
 
-      {/* Navigation tabs */}
-      <div className="flex gap-2 border-b border-white/10 pb-3 mb-6">
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-[#E8DEFF] pb-3">
         <button
           onClick={() => {
             setActiveTab("flashcards");
             setIsFlipped(false);
           }}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
             activeTab === "flashcards"
-              ? "bg-white text-black"
-              : "bg-white/5 hover:bg-white/10 text-white/70"
+              ? "bg-[#6C63FF] text-white shadow-bouncy-purple"
+              : "bg-[#FFF9F0] hover:bg-[#FFF3D6] text-[#546E7A]"
           }`}
         >
-          🗂️ Flashcards {cards.length > 0 && `(${cards.length})`}
+          🗂️ Memory Cards {cards.length > 0 && `(${cards.length})`}
         </button>
         <button
           onClick={() => setActiveTab("queue")}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
             activeTab === "queue"
-              ? "bg-white text-black"
-              : "bg-white/5 hover:bg-white/10 text-white/70"
+              ? "bg-[#6C63FF] text-white shadow-bouncy-purple"
+              : "bg-[#FFF9F0] hover:bg-[#FFF3D6] text-[#546E7A]"
           }`}
         >
-          ⏰ Spaced Queue ({stats.due} due)
+          ⏰ Review List ({stats.due} ready)
         </button>
         <button
           onClick={() => setActiveTab("quiz")}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
             activeTab === "quiz"
-              ? "bg-white text-black"
-              : "bg-white/5 hover:bg-white/10 text-white/70"
+              ? "bg-[#6C63FF] text-white shadow-bouncy-purple"
+              : "bg-[#FFF9F0] hover:bg-[#FFF3D6] text-[#546E7A]"
           }`}
         >
-          ⚡ Quick Recall Test
+          ⚡ Fun Mini-Quiz
         </button>
       </div>
 
-      {/* Tab 1: Flashcards */}
+      {/* Tab 1: Memory Cards */}
       {activeTab === "flashcards" && (
         <div className="flex flex-col items-center">
           {cards.length === 0 && dueCards.length === 0 ? (
-            <div className="p-8 text-center bg-white/[0.02] border border-white/10 rounded-2xl w-full max-w-md">
-              <p className="text-sm text-white/60 mb-4">No flashcards generated for this topic yet.</p>
+            <div className="p-8 text-center bg-[#FFF9F0] border-2 border-dashed border-[#E8DEFF] rounded-3xl w-full max-w-md">
+              <span className="text-4xl block mb-2">✨</span>
+              <p className="text-sm font-bold text-[#263238] mb-4">No cards made for this lesson yet!</p>
               <button
                 onClick={onGenerateCards}
                 disabled={isGenerating}
-                className="px-6 py-2.5 rounded-full bg-white text-black text-xs font-semibold hover:bg-white/90 shadow-xl shadow-white/10"
+                className="px-6 py-3 rounded-full bg-[#6C63FF] text-white text-xs font-bold shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none"
               >
-                {isGenerating ? "Generating..." : "✨ Generate Lesson Flashcards"}
+                {isGenerating ? "Making Cards..." : "Make Memory Cards"}
               </button>
             </div>
           ) : currentCard ? (
-            <div className="w-full max-w-xl flex flex-col items-center">
-              <span className="font-mono text-xs text-white/40 mb-3">
-                Card {cardIndex + 1} of {cards.length || dueCards.length} • Level {currentCard.level || 0}
+            <div className="w-full max-w-lg flex flex-col items-center">
+              <span className="text-xs font-bold text-[#546E7A] mb-3">
+                Card {cardIndex + 1} of {cards.length || dueCards.length}
               </span>
 
-              {/* 3D Flip Card */}
+              {/* Cheerful 3D Flip Card */}
               <div
                 onClick={() => setIsFlipped(!isFlipped)}
-                className={`w-full h-72 rounded-3xl p-8 border transition-all duration-500 cursor-pointer relative shadow-2xl flex flex-col justify-between select-none ${
+                className={`w-full h-72 rounded-[36px] p-8 border-2 transition-all duration-300 cursor-pointer relative shadow-card flex flex-col justify-between select-none ${
                   isFlipped
-                    ? "bg-gradient-to-br from-[#7C3AED]/25 via-[#0D0912] to-[#07050B] border-[#9F67FF]/50 shadow-[#7C3AED]/10"
-                    : "bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-transparent border-white/15"
+                    ? "bg-gradient-to-b from-[#DFF7F0] to-white border-[#2EC4B6]"
+                    : "bg-gradient-to-b from-[#FFF3D6] to-white border-[#FFB84D]/60"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#C084FC] font-bold px-2.5 py-1 rounded bg-white/10">
-                    {currentCard.concept || "Key Idea"}
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#534BD6] px-3 py-1 rounded-full bg-white/80 shadow-sm">
+                    {currentCard.concept || "Idea"}
                   </span>
-                  <span className="font-mono text-[10px] text-white/40">Tap to reveal ↻</span>
+                  <span className="text-xs font-bold text-[#546E7A]">Tap to see answer ↻</span>
                 </div>
 
-                <div className="text-center font-display text-2xl text-white font-medium leading-relaxed my-auto">
+                <div className="text-center font-display text-2xl sm:text-3xl text-[#263238] font-bold leading-relaxed my-auto">
                   {isFlipped ? currentCard.back : currentCard.front}
                 </div>
 
                 {isFlipped && currentCard.hint && (
-                  <div className="text-xs text-[#C084FC]/90 bg-[#7C3AED]/15 border border-[#9F67FF]/20 p-2.5 rounded-xl text-center">
+                  <div className="text-xs text-[#2EC4B6] font-bold bg-white/80 p-2.5 rounded-2xl text-center border border-[#DFF7F0]">
                     💡 {currentCard.hint}
                   </div>
                 )}
               </div>
 
-              {/* Recall Self-Assessment Buttons (Again, Almost, Got It) */}
+              {/* Friendly Rating Buttons */}
               {isFlipped && (
                 <div className="mt-6 flex flex-col items-center gap-3">
-                  <span className="text-xs text-white/50">How well did you remember?</span>
-                  <div className="flex gap-3">
+                  <span className="text-xs font-bold text-[#546E7A]">How did you do?</span>
+                  <div className="flex gap-2.5">
                     <button
                       onClick={() => handleCardOutcome(false, 0.2)}
-                      className="px-5 py-2 rounded-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-semibold"
+                      className="px-5 py-2.5 rounded-full bg-[#FFE0E5] hover:bg-[#FFCCD5] text-[#FF5E7E] text-xs font-bold transition-all shadow-sm"
                     >
-                      Again (5m)
+                      Not yet 🤔
                     </button>
                     <button
                       onClick={() => handleCardOutcome(true, 0.6)}
-                      className="px-5 py-2 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-semibold"
+                      className="px-5 py-2.5 rounded-full bg-[#FFF3D6] hover:bg-[#FFE6A3] text-[#E08A00] text-xs font-bold transition-all shadow-sm"
                     >
-                      Almost (1d)
+                      Almost ✨
                     </button>
                     <button
                       onClick={() => handleCardOutcome(true, 0.95)}
-                      className="px-5 py-2 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white text-xs font-semibold hover:opacity-90 shadow-lg shadow-[#7C3AED]/20"
+                      className="px-5 py-2.5 rounded-full bg-[#DFF7F0] hover:bg-[#C2F2E4] text-[#20A396] text-xs font-bold transition-all shadow-sm"
                     >
-                      Got It! (3d)
+                      I know it! 🎉
                     </button>
                   </div>
                 </div>
@@ -187,72 +188,52 @@ export default function RecallView({
         </div>
       )}
 
-      {/* Tab 2: Spaced Queue */}
+      {/* Tab 2: Queue */}
       {activeTab === "queue" && (
-        <div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-            {[
-              { level: 0, label: "5 Min", desc: "Immediate Check" },
-              { level: 1, label: "1 Day", desc: "Short-term" },
-              { level: 2, label: "3 Days", desc: "Consolidation" },
-              { level: 3, label: "7 Days", desc: "Long-term" },
-              { level: 4, label: "14 Days", desc: "Mastered" },
-            ].map((slot) => (
-              <div key={slot.level} className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-center">
-                <span className="font-mono text-xs font-bold text-[#C084FC] block">L{slot.level}</span>
-                <strong className="text-xs text-white block mt-1">{slot.label}</strong>
-                <span className="text-[10px] text-white/40">{slot.desc}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-3">
-            {(cards.length > 0 ? cards : dueCards).map((card) => {
-              const isDue = card.nextReview <= Date.now() || card.status === "weak";
-              return (
-                <div
-                  key={card.id}
-                  className={`p-4 rounded-xl border flex items-center justify-between gap-4 ${
-                    isDue ? "bg-rose-950/20 border-rose-500/40" : "bg-white/[0.02] border-white/10"
+        <div className="space-y-3">
+          {(cards.length > 0 ? cards : dueCards).map((card) => {
+            const isDue = card.nextReview <= Date.now() || card.status === "weak";
+            return (
+              <div
+                key={card.id}
+                className="p-4 rounded-3xl bg-[#FFF9F0] border border-[#E8DEFF] flex items-center justify-between gap-4"
+              >
+                <div>
+                  <strong className="text-sm font-display text-[#263238] block">{card.front}</strong>
+                  <span className="text-xs text-[#546E7A]">{card.back}</span>
+                </div>
+                <span
+                  className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    isDue ? "bg-[#FFE0E5] text-[#FF5E7E]" : "bg-[#DFF7F0] text-[#20A396]"
                   }`}
                 >
-                  <div>
-                    <strong className="text-sm text-white block">{card.front}</strong>
-                    <span className="text-xs text-white/50">{card.back}</span>
-                  </div>
-                  <span
-                    className={`font-mono text-[10px] px-2.5 py-1 rounded-full font-semibold ${
-                      isDue ? "bg-rose-500/20 text-rose-300" : "bg-white/10 text-white/60"
-                    }`}
-                  >
-                    {isDue ? "⚠️ Review Due" : `Level ${card.level || 0}`}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+                  {isDue ? "Ready to practice" : "Remembered"}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {/* Tab 3: Quick Recall Quiz */}
+      {/* Tab 3: Fun Quiz */}
       {activeTab === "quiz" && (
         <div className="space-y-4">
           {(cards.length > 0 ? cards.slice(0, 3) : dueCards.slice(0, 3)).map((card, idx) => (
-            <div key={card.id} className="p-4 rounded-2xl bg-white/[0.03] border border-white/10">
-              <span className="font-mono text-[10px] uppercase text-[#C084FC] font-bold block mb-1">
+            <div key={card.id} className="p-5 rounded-3xl bg-[#FFF9F0] border border-[#E8DEFF] space-y-2">
+              <span className="text-xs font-bold text-[#6C63FF] uppercase block">
                 Question {idx + 1}
               </span>
-              <p className="text-sm font-semibold text-white mb-2">{card.front}</p>
+              <p className="text-sm font-display font-bold text-[#263238]">{card.front}</p>
               <textarea
                 rows={2}
-                placeholder="Write what you remember..."
+                placeholder="Type your answer here..."
                 value={quizAnswers[card.id] || ""}
                 onChange={(e) => setQuizAnswers({ ...quizAnswers, [card.id]: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/15 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#C084FC]"
+                className="w-full bg-white border border-[#E8DEFF] rounded-2xl p-3 text-xs text-[#263238] font-bold focus:outline-none focus:border-[#6C63FF]"
               />
               {quizSubmitted && (
-                <div className="mt-2 text-xs text-[#C084FC] bg-[#7C3AED]/20 p-2.5 rounded-lg border border-[#9F67FF]/30">
-                  <strong>Expected Answer:</strong> {card.back}
+                <div className="mt-2 text-xs text-[#20A396] font-bold bg-[#DFF7F0] p-3 rounded-2xl border border-[#DFF7F0]">
+                  <strong>Awesome try! Riff's note:</strong> {card.back}
                 </div>
               )}
             </div>
@@ -262,9 +243,9 @@ export default function RecallView({
             {!quizSubmitted ? (
               <button
                 onClick={() => setQuizSubmitted(true)}
-                className="px-6 py-2.5 rounded-full bg-white text-black text-xs font-semibold hover:bg-white/90"
+                className="px-6 py-3 rounded-full bg-[#6C63FF] text-white text-xs font-bold shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none"
               >
-                Submit Recall Answers
+                Check My Answers ✨
               </button>
             ) : (
               <button
@@ -272,9 +253,9 @@ export default function RecallView({
                   setQuizSubmitted(false);
                   setQuizAnswers({});
                 }}
-                className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold"
+                className="px-6 py-3 rounded-full bg-white border-2 border-[#E8DEFF] text-[#263238] text-xs font-bold hover:bg-[#FFF3D6]"
               >
-                Reset Mini-Test
+                Try Again
               </button>
             )}
           </div>

@@ -1,81 +1,115 @@
 // LearningDNA.jsx
-// Dynamic modality affinity breakdown computed from actual learner interactions (not fixed personality traits).
+// "How You Like to Learn" — positive, encouraging insights on how the child learns best.
 
 import { motion } from "framer-motion";
 
 export default function LearningDNA({ profile = {}, onSelectModality }) {
-  const modalities = [
-    { id: "visual", label: "Visual Spatial (RiffBoard)", icon: "🎨", color: "#9F67FF" },
-    { id: "micro-step", label: "Micro-Step Sequencing", icon: "🧩", color: "#47BFFF" },
-    { id: "analogy", label: "Metaphor Bridge", icon: "🌉", color: "#C084FC" },
-    { id: "audio", label: "Audio Read Aloud", icon: "🔊", color: "#38BDF8" },
-    { id: "teach-back", label: "Teach-Back Roleplay", icon: "🗣️", color: "#818CF8" },
-    { id: "retrieval", label: "Active Recall Spacing", icon: "🗂️", color: "#10B981" },
-    { id: "interactive", label: "Interactive Steps", icon: "🎮", color: "#F59E0B" },
-    { id: "text", label: "Text Passage", icon: "📄", color: "#CBD5E1" },
+  const styles = [
+    {
+      id: "visual",
+      label: "Visuals & Pictures",
+      emoji: "🎨",
+      bg: "#E8DEFF",
+      border: "#D8C4FF",
+      desc: "You seem to enjoy seeing ideas drawn out as pictures.",
+    },
+    {
+      id: "micro-step",
+      label: "Small Steps",
+      emoji: "🪜",
+      bg: "#DCEBFF",
+      border: "#BEDBFF",
+      desc: "Short, bite-sized steps keep things moving without stress.",
+    },
+    {
+      id: "analogy",
+      label: "Fun Stories",
+      emoji: "🌉",
+      bg: "#FFF3D6",
+      border: "#FFE099",
+      desc: "Stories connecting concepts to your favorite hobbies make things click.",
+    },
+    {
+      id: "audio",
+      label: "Listening",
+      emoji: "🔊",
+      bg: "#DFF7F0",
+      border: "#BAEFE2",
+      desc: "Hearing things read out loud helps your focus stay sharp.",
+    },
+    {
+      id: "teach-back",
+      label: "Teaching Others",
+      emoji: "🗣️",
+      bg: "#FFE0E5",
+      border: "#FFC2CD",
+      desc: "Explaining in your own words helps solidify what you know.",
+    },
+    {
+      id: "retrieval",
+      label: "Quick Practice",
+      emoji: "🧠",
+      bg: "#E8DEFF",
+      border: "#D8C4FF",
+      desc: "Playful memory check-ins keep ideas fresh in your mind.",
+    },
   ];
 
   return (
-    <div className="w-full p-6 sm:p-8 rounded-3xl bg-white/[0.04] border border-white/[0.1] backdrop-blur-xl shadow-xl space-y-6">
+    <div className="w-full p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#C084FC] font-semibold px-2.5 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-            Learner State Profile
+          <span className="text-xs font-bold uppercase tracking-wide text-[#6C63FF] px-3 py-1 rounded-full bg-[#E8DEFF]">
+            🌟 YOUR LEARNING STRENGTHS
           </span>
-          <h3 className="font-display text-2xl sm:text-3xl text-white font-bold mt-2">
-            Your Learning DNA
+          <h3 className="font-display text-2xl sm:text-3xl font-bold text-[#263238] mt-2">
+            How You Like to Learn
           </h3>
-          <p className="text-xs text-white/50 mt-1">
-            Based on your recent interaction outcomes — dynamic tendencies, not permanent diagnostic labels.
+          <p className="text-[#546E7A] text-xs sm:text-sm mt-1">
+            Everyone's brain works in a cool, unique way. Here’s what Riff has noticed works great for you!
           </p>
         </div>
       </div>
 
-      {/* Modality Affinities Progress Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {modalities.map((m) => {
-          const rawAffinity = profile[m.id]?.affinity !== undefined ? profile[m.id].affinity : 0.5;
-          const pct = Math.round(Math.min(100, Math.max(15, rawAffinity * 100)));
-          const successes = profile[m.id]?.successes || 0;
+      {/* Grid of Friendly Learning Style Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {styles.map((s) => {
+          const rawAffinity = profile[s.id]?.affinity !== undefined ? profile[s.id].affinity : 0.6;
+          const pct = Math.round(Math.min(100, Math.max(30, rawAffinity * 100)));
 
           return (
             <div
-              key={m.id}
-              onClick={() => onSelectModality && onSelectModality(m.id)}
-              className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] transition-all cursor-pointer group flex flex-col justify-between"
+              key={s.id}
+              onClick={() => onSelectModality && onSelectModality(s.id)}
+              className="p-5 rounded-3xl border-2 transition-all cursor-pointer group flex flex-col justify-between hover:scale-[1.02] shadow-sm"
+              style={{ backgroundColor: s.bg, borderColor: s.border }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-base">{m.icon}</span>
-                  <span className="text-xs font-semibold text-white group-hover:text-[#C084FC] transition-colors">
-                    {m.label}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-3xl">{s.emoji}</span>
+                  <span className="text-xs font-bold font-sans px-2.5 py-1 rounded-full bg-white/80 text-[#263238] shadow-sm">
+                    {pct}% Favorite
                   </span>
                 </div>
-                <span className="font-mono text-xs font-bold text-white/90">{pct}%</span>
+                <h4 className="font-display font-bold text-base text-[#263238] mb-1">
+                  {s.label}
+                </h4>
+                <p className="text-xs text-[#546E7A] font-medium leading-relaxed">
+                  {s.desc}
+                </p>
               </div>
 
-              <div className="h-2 w-full bg-white/[0.06] rounded-full overflow-hidden my-2">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${pct}%` }}
-                  transition={{ duration: 0.8 }}
-                  className="h-full rounded-full"
-                  style={{ backgroundColor: m.color }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[10px] font-mono text-white/40">
-                <span>{successes > 0 ? `${successes} positive outcomes` : "Calibrating..."}</span>
-                <span className="text-[#C084FC] group-hover:translate-x-0.5 transition-transform">Practice →</span>
+              <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between text-xs font-bold text-[#263238]">
+                <span>Try this style</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="pt-4 border-t border-white/[0.08] text-[11px] text-white/40 flex items-center justify-between">
-        <span>DNA weights adjust dynamically with each answer submission and interaction check.</span>
-        <span className="font-mono text-[#10B981]">Adaptive Engine Synced</span>
+      <div className="pt-4 border-t border-[#E8DEFF] text-center text-xs text-[#546E7A] font-medium">
+        ✨ Riff updates these ideas as you practice together!
       </div>
     </div>
   );

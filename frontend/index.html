@@ -1,51 +1,62 @@
 <!doctype html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#07050B" />
+    <meta name="theme-color" content="#FFF9F0" />
     <meta
       name="description"
-      content="RIFF — Adaptive Neuro-Learning Engine. Notices when the current way of learning isn't working, and changes how it teaches in real time."
+      content="RIFF — Your friendly adaptive learning buddy. Riff notices when learning gets tricky and changes how it helps, so you can keep going!"
     />
-    <title>RIFF — Adaptive Neuro-Learning Engine</title>
+    <title>Riff — Your Smart Learning Buddy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600;1,700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <!-- Tailwind CSS with custom Fluxora/Riff dark palette configuration -->
+    <!-- Tailwind CSS with warm, playful learning palette -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
-              display: ['"Inter Tight"', 'Inter', 'sans-serif'],
-              serif: ['"Instrument Serif"', 'Georgia', 'serif'],
-              sans: ['Inter', 'system-ui', 'sans-serif'],
+              display: ['"Fredoka"', 'Nunito', 'sans-serif'],
+              sans: ['"Nunito"', 'Inter', 'system-ui', 'sans-serif'],
+              hand: ['"Caveat"', 'cursive', 'sans-serif'],
               mono: ['"JetBrains Mono"', 'monospace'],
             },
             colors: {
-              riffBg: '#07050B',
-              riffBgSecondary: '#0D0912',
-              riffBgTertiary: '#120A18',
-              riffAccent: '#7C3AED',
-              riffAccentHover: '#9F67FF',
-              riffAccentLight: '#C084FC',
-              riffCyan: '#47BFFF',
-              riffGlass: 'rgba(255, 255, 255, 0.06)',
-              riffGlassHeavy: 'rgba(255, 255, 255, 0.09)',
-              riffBorder: 'rgba(255, 255, 255, 0.12)',
+              riffPaper: '#FFF9F0',
+              riffYellow: '#FFF3D6',
+              riffYellowDark: '#FFB84D',
+              riffMint: '#DFF7F0',
+              riffMintDark: '#2EC4B6',
+              riffSky: '#DCEBFF',
+              riffSkyDark: '#3A86FF',
+              riffLavender: '#E8DEFF',
+              riffPurple: '#6C63FF',
+              riffPurpleDark: '#534BD6',
+              riffCoral: '#FFE0E5',
+              riffCoralDark: '#FF5E7E',
+              riffInk: '#263238',
+              riffInkSoft: '#546E7A',
+              riffInkLight: '#90A4AE',
+            },
+            boxShadow: {
+              'bouncy': '0 8px 0 rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.04)',
+              'bouncy-purple': '0 6px 0 #534BD6, 0 10px 20px rgba(108, 99, 255, 0.25)',
+              'bouncy-mint': '0 6px 0 #20A396, 0 10px 20px rgba(46, 196, 182, 0.25)',
+              'bouncy-orange': '0 6px 0 #E08A00, 0 10px 20px rgba(255, 184, 77, 0.25)',
+              'card': '0 4px 20px rgba(74, 58, 42, 0.06)',
             }
           }
         }
       }
     </script>
   </head>
-  <body class="bg-[#07050B] text-white selection:bg-[#7C3AED]/30 selection:text-white overflow-x-hidden antialiased font-sans">
+  <body class="bg-[#FFF9F0] text-[#263238] selection:bg-[#E8DEFF] selection:text-[#534BD6] overflow-x-hidden antialiased font-sans">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

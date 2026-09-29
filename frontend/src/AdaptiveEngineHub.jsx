@@ -1,28 +1,10 @@
 // AdaptiveEngineHub.jsx
-// Central Riff Adaptive Engine Hub:
-// Clean glass command center with real vitals, explainability trigger, and autopilot proposal.
+// Warm, kid-friendly learning hub showing encouraging progress,
+// adaptive suggestions ("Let's try a different way"), and simple visual feedback.
 
 import { useState } from "react";
 import { AUTOPILOT_STATES } from "./riffController.js";
 import { motion } from "framer-motion";
-
-const STATE_CONFIG = {
-  focused: { dot: "#10B981", label: "STEADY", sub: "Pacing aligned with personal baseline" },
-  uncertain: { dot: "#F59E0B", label: "PONDERING", sub: "Deliberate hesitation observed" },
-  struggling: { dot: "#F43F5E", label: "FRICTION DETECTED", sub: "Pacing slowed + revision bursts" },
-  disengaging: { dot: "#9F67FF", label: "EXTENDED PAUSE", sub: "Thinking pause on current step" },
-};
-
-const MODE_META = {
-  text: { icon: "📄", label: "Text Explanation" },
-  visual: { icon: "🎨", label: "Visual Model (RiffBoard)" },
-  "micro-step": { icon: "🧩", label: "Micro-Steps (Focus)" },
-  analogy: { icon: "🌉", label: "Concept Bridge" },
-  audio: { icon: "🔊", label: "Audio Read Aloud" },
-  interactive: { icon: "🎮", label: "Interactive Steps" },
-  "teach-back": { icon: "🗣️", label: "Teach-Back Roleplay" },
-  retrieval: { icon: "🗂️", label: "Active Recall" },
-};
 
 export default function AdaptiveEngineHub({
   autopilotState = AUTOPILOT_STATES.OBSERVING,
@@ -38,154 +20,111 @@ export default function AdaptiveEngineHub({
 }) {
   const [showOverrideMenu, setShowOverrideMenu] = useState(false);
 
-  const stateCfg = STATE_CONFIG[behaviorState?.state] || STATE_CONFIG.focused;
-  const currentModeInfo = MODE_META[currentModality] || MODE_META.text;
-
-  const understandingPct = understandingConfidence !== null
-    ? Math.round(understandingConfidence * 100)
-    : 45;
-
-  const autopilotLabels = {
-    [AUTOPILOT_STATES.OBSERVING]: "● Observing Interaction Cadence",
-    [AUTOPILOT_STATES.THINKING]: "✦ Analyzing Understanding",
-    [AUTOPILOT_STATES.ADAPTING]: "⚡ Changing Teaching Strategy",
-    [AUTOPILOT_STATES.HELPING]: "💡 Offering Focus Support",
-    [AUTOPILOT_STATES.LEARNING]: "🌱 Updating Learning DNA",
-  };
+  const isStuck = behaviorState?.isFrictionDetected;
 
   return (
-    <div className="w-full p-6 sm:p-8 rounded-3xl bg-white/[0.045] border border-white/[0.12] backdrop-blur-2xl shadow-2xl shadow-black/80 relative overflow-hidden">
-      {/* Top Header Row */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="font-mono text-[11px] uppercase tracking-widest text-[#C084FC] font-bold px-3 py-1 rounded-full bg-[#7C3AED]/20 border border-[#9F67FF]/30">
-            ✦ RIFF ADAPTIVE ENGINE
-          </span>
-          <span className="font-mono text-xs text-white/70 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 flex items-center gap-2">
-            <span
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ background: stateCfg.dot }}
-            />
-            {autopilotLabels[autopilotState] || autopilotLabels[AUTOPILOT_STATES.OBSERVING]}
-          </span>
+    <div className="w-full p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card space-y-6">
+      {/* Top Header Row with Mascot status */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#FFF3D6] flex items-center justify-center text-xl shadow-sm">
+            🌱
+          </div>
+          <div>
+            <h3 className="font-display text-xl font-bold text-[#263238]">
+              Your Learning Today
+            </h3>
+            <p className="text-xs text-[#546E7A]">
+              Riff is cheering you on and learning how you like to think!
+            </p>
+          </div>
         </div>
 
         <button
           onClick={() => setShowOverrideMenu(!showOverrideMenu)}
-          className="px-4 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/12 text-xs font-medium text-white/80 hover:text-white transition-all backdrop-blur-md flex items-center gap-1.5"
+          className="px-4 py-2 rounded-full bg-[#FFF9F0] hover:bg-[#FFF3D6] border border-[#E8DEFF] text-xs font-bold text-[#546E7A] hover:text-[#263238] transition-all flex items-center gap-1.5 shadow-sm"
         >
-          <span>🔄 Try Another Way</span>
+          <span>🔄 Pick Another Way</span>
           <span className="text-[10px]">{showOverrideMenu ? "▲" : "▼"}</span>
         </button>
       </div>
 
-      {/* 4 Core Vitals Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Vital 1: Understanding Confidence */}
-        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">
-              Learning Confidence
+      {/* 3 Simple Encouraging Cards (No intimidating SaaS analytics!) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Card 1: Understanding / Feeling Good */}
+        <div className="p-4 rounded-3xl bg-[#DFF7F0]/60 border border-[#DFF7F0] flex items-center gap-3.5">
+          <span className="text-3xl">🎯</span>
+          <div>
+            <span className="text-xs font-bold text-[#20A396] uppercase tracking-wide block">
+              Understanding
             </span>
-            <span className="font-mono text-base font-bold text-white">{understandingPct}%</span>
+            <strong className="font-display text-base text-[#263238] block">
+              {understandingConfidence !== null ? `${Math.round(understandingConfidence * 100)}% Mastered` : "Building baseline"}
+            </strong>
           </div>
-          <div className="h-2 w-full bg-white/[0.08] rounded-full overflow-hidden my-1">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${understandingPct}%` }}
-              transition={{ duration: 0.8 }}
-              className="h-full rounded-full bg-gradient-to-r from-[#7C3AED] to-[#47BFFF]"
-            />
-          </div>
-          <span className="text-[11px] text-white/40 mt-1">
-            {understandingPct >= 70
-              ? "Strong conceptual grasp"
-              : understandingPct >= 45
-              ? "Developing comprehension"
-              : "Building session baseline"}
-          </span>
         </div>
 
-        {/* Vital 2: Focus Rhythm */}
-        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">
-              Focus State
+        {/* Card 2: Rhythm / Pace */}
+        <div className="p-4 rounded-3xl bg-[#DCEBFF]/60 border border-[#DCEBFF] flex items-center gap-3.5">
+          <span className="text-3xl">{isStuck ? "💡" : "✨"}</span>
+          <div>
+            <span className="text-xs font-bold text-[#3A86FF] uppercase tracking-wide block">
+              Pacing
             </span>
-            <span
-              className="font-mono text-sm font-bold flex items-center gap-1.5"
-              style={{ color: stateCfg.dot }}
-            >
-              <span className="w-2 h-2 rounded-full" style={{ background: stateCfg.dot }} />
-              {stateCfg.label}
-            </span>
+            <strong className="font-display text-base text-[#263238] block">
+              {isStuck ? "Ready for a hint" : "Smooth & Steady"}
+            </strong>
           </div>
-          <span className="text-[11px] text-white/40 mt-auto">{stateCfg.sub}</span>
         </div>
 
-        {/* Vital 3: Current Active Mode */}
-        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">
-              Active Mode
+        {/* Card 3: Memory Cards */}
+        <div className="p-4 rounded-3xl bg-[#FFE0E5]/60 border border-[#FFE0E5] flex items-center gap-3.5">
+          <span className="text-3xl">🧠</span>
+          <div>
+            <span className="text-xs font-bold text-[#FF5E7E] uppercase tracking-wide block">
+              Memory Practice
             </span>
-            <span className="text-sm font-semibold text-white flex items-center gap-1.5">
-              <span>{currentModeInfo.icon}</span> {currentModeInfo.label}
-            </span>
+            <strong className="font-display text-base text-[#263238] block">
+              {retentionStats?.due > 0 ? `${retentionStats.due} due to review` : "All caught up!"}
+            </strong>
           </div>
-          <span className="text-[11px] text-white/40 mt-auto">Adaptive presentation active</span>
-        </div>
-
-        {/* Vital 4: Memory Retention Queue */}
-        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-white/50">
-              Memory Health
-            </span>
-            <span className="font-mono text-sm font-bold text-white">
-              {retentionStats?.due > 0 ? `${retentionStats.due} Due Now` : "Up to Date"}
-            </span>
-          </div>
-          <span className="text-[11px] text-white/40 mt-auto">
-            {retentionStats?.mastered || 0} mastered • {retentionStats?.total || 0} tracked
-          </span>
         </div>
       </div>
 
-      {/* Riff Is Adapting Banner */}
+      {/* ADAPTIVE INTERVENTION CARD ("Let's try a different way") */}
       {adaptationDecision && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-gradient-to-r from-[#7C3AED]/20 via-[#47BFFF]/10 to-[#0D0912] border border-[#9F67FF]/30 backdrop-blur-md"
+          className="p-6 rounded-3xl bg-gradient-to-r from-[#FFF3D6] via-[#FFE0E5] to-[#E8DEFF] border-2 border-[#FFB84D]/40 shadow-sm"
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#C084FC] tracking-wider">
-              <span>⚡</span> RIFF IS ADAPTING
+            <div className="flex items-center gap-2 font-display text-sm font-bold text-[#263238]">
+              <span>💡</span> Let’s try a different way!
             </div>
             {onOpenWhyAdapted && (
               <button
                 onClick={onOpenWhyAdapted}
-                className="text-xs text-[#C084FC] hover:text-white underline font-medium"
+                className="text-xs font-bold text-[#6C63FF] hover:underline"
               >
-                🔍 Why did Riff change?
+                Why did Riff suggest this?
               </button>
             )}
           </div>
 
-          <p className="font-serif text-lg text-white/95 leading-relaxed mb-4 italic">
+          <p className="font-sans text-sm text-[#263238] font-semibold leading-relaxed mb-4">
             “{adaptationDecision.message}”
           </p>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             {adaptationDecision.actions?.map((act) => (
               <button
                 key={act.id}
                 onClick={() => onAcceptAdaptation && onAcceptAdaptation(act.id)}
-                className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
+                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all ${
                   act.primary
-                    ? "bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white hover:opacity-90 shadow-lg shadow-[#7C3AED]/20"
-                    : "bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-white"
+                    ? "bg-[#6C63FF] text-white shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none"
+                    : "bg-white text-[#263238] border border-[#E8DEFF] hover:bg-[#FFF9F0]"
                 }`}
               >
                 {act.label}
@@ -193,34 +132,33 @@ export default function AdaptiveEngineHub({
             ))}
             <button
               onClick={onKeepCurrentModality}
-              className="px-4 py-2 rounded-full text-xs font-medium text-white/50 hover:text-white/80 transition-colors"
+              className="px-4 py-2 rounded-full text-xs font-bold text-[#546E7A] hover:text-[#263238]"
             >
-              Keep current mode
+              Keep going my way
             </button>
           </div>
         </motion.div>
       )}
 
-      {/* Mode Override Drawer */}
+      {/* Modality Override Drawer */}
       {showOverrideMenu && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
-          className="mt-4 p-4 rounded-2xl bg-white/[0.04] border border-white/10"
+          className="p-5 rounded-3xl bg-[#FFF9F0] border border-[#E8DEFF]"
         >
-          <span className="block font-mono text-[10px] uppercase text-white/50 mb-3">
-            Manually switch learning modality:
+          <span className="block font-display text-xs font-bold text-[#546E7A] uppercase mb-3">
+            How would you like Riff to teach right now?
           </span>
           <div className="flex flex-wrap gap-2">
             {[
-              { id: "visual", icon: "🎨", label: "Visual (RiffBoard)" },
-              { id: "micro-step", icon: "🧩", label: "Step-by-Step" },
-              { id: "analogy", icon: "🌉", label: "Concept Bridge" },
-              { id: "audio", icon: "🔊", label: "Audio Narration" },
-              { id: "interactive", icon: "🎮", label: "Interactive Steps" },
-              { id: "teach-back", icon: "🗣️", label: "Teach It Back" },
-              { id: "retrieval", icon: "🗂️", label: "Recall Flashcards" },
+              { id: "visual", icon: "🎨", label: "Show me with drawings" },
+              { id: "micro-step", icon: "🪜", label: "Break into tiny steps" },
+              { id: "analogy", icon: "🌉", label: "Connect to a fun story" },
+              { id: "audio", icon: "🔊", label: "Read it out loud" },
+              { id: "teach-back", icon: "🗣️", label: "Let me teach Riff" },
+              { id: "retrieval", icon: "🧠", label: "Quick memory quiz" },
             ].map((m) => (
               <button
                 key={m.id}
@@ -228,10 +166,10 @@ export default function AdaptiveEngineHub({
                   if (onSelectModality) onSelectModality(m.id);
                   setShowOverrideMenu(false);
                 }}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5 ${
+                className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
                   currentModality === m.id
-                    ? "bg-[#7C3AED] text-white border-[#9F67FF] shadow-md shadow-[#7C3AED]/30"
-                    : "bg-white/[0.05] border-white/10 text-white/70 hover:text-white hover:bg-white/10"
+                    ? "bg-[#6C63FF] text-white border-[#534BD6] shadow-sm"
+                    : "bg-white border-[#E8DEFF] text-[#263238] hover:bg-[#FFF3D6]"
                 }`}
               >
                 <span>{m.icon}</span>

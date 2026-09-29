@@ -1,23 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600;1,700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600;700&display=swap");
 
 :root {
-  --riff-bg: #07050B;
-  --riff-bg-secondary: #0D0912;
-  --riff-bg-tertiary: #120A18;
-  --riff-accent: #7C3AED;
-  --riff-accent-hover: #9F67FF;
-  --riff-accent-light: #C084FC;
-  --riff-cyan: #47BFFF;
-  --riff-emerald: #10B981;
-  --riff-rose: #F43F5E;
-  --riff-glass: rgba(255, 255, 255, 0.055);
-  --riff-glass-heavy: rgba(255, 255, 255, 0.09);
-  --riff-border: rgba(255, 255, 255, 0.12);
-  --riff-border-subtle: rgba(255, 255, 255, 0.07);
-  --riff-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --radius-sm: 10px;
+  --riff-paper: #FFF9F0;
+  --riff-yellow: #FFF3D6;
+  --riff-yellow-dark: #FFB84D;
+  --riff-mint: #DFF7F0;
+  --riff-mint-dark: #2EC4B6;
+  --riff-sky: #DCEBFF;
+  --riff-sky-dark: #3A86FF;
+  --riff-lavender: #E8DEFF;
+  --riff-purple: #6C63FF;
+  --riff-purple-dark: #534BD6;
+  --riff-coral: #FFE0E5;
+  --riff-coral-dark: #FF5E7E;
+  --riff-ink: #263238;
+  --riff-ink-soft: #546E7A;
 }
 
 * {
@@ -25,38 +22,38 @@
 }
 
 html {
-  background-color: var(--riff-bg);
-  color: #ffffff;
+  background-color: var(--riff-paper);
+  color: var(--riff-ink);
 }
 
 body {
   margin: 0;
-  font-family: "Inter", sans-serif;
-  background-color: var(--riff-bg);
-  color: #ffffff;
+  font-family: "Nunito", sans-serif;
+  background-color: var(--riff-paper);
+  color: var(--riff-ink);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom Scrollbar */
+/* Custom Friendly Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #07050b;
+  background: #FFF9F0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: #E8DEFF;
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: #6C63FF;
 }
 
-/* Reduced motion preference */
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

@@ -1,5 +1,6 @@
 // FocusRoom.jsx
-// Immersive, de-cluttered single-instruction focus room with large typography and rescue shortcuts.
+// Friendly, calm Focus Room ("Let's make this smaller") for young learners.
+// Distraction-free single-instruction card with audio narration, drawing button, and encouragement.
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -40,57 +41,72 @@ export default function FocusRoom({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#07050B]/95 backdrop-blur-3xl flex flex-col justify-between p-6 sm:p-12 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#FFF9F0]/98 backdrop-blur-xl flex flex-col justify-between p-6 sm:p-12 overflow-y-auto">
       {/* Top Bar */}
-      <div className="max-w-4xl mx-auto w-full flex items-center justify-between pb-6 border-b border-white/10">
+      <div className="max-w-3xl mx-auto w-full flex items-center justify-between pb-6 border-b border-[#E8DEFF]">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#C084FC] font-bold px-3 py-1 rounded-full bg-[#7C3AED]/20 border border-[#9F67FF]/30">
-            RIFF FOCUS ROOM
-          </span>
-          <span className="text-xs font-mono text-white/50">
-            Step {currentStepIdx + 1} of {totalSteps}
-          </span>
+          <div className="w-10 h-10 rounded-2xl bg-[#E8DEFF] flex items-center justify-center text-xl shadow-sm">
+            🪜
+          </div>
+          <div>
+            <h3 className="font-display text-lg font-bold text-[#263238]">
+              Let's make this smaller.
+            </h3>
+            <span className="text-xs font-semibold text-[#546E7A]">
+              Step {currentStepIdx + 1} of {totalSteps} tiny steps
+            </span>
+          </div>
         </div>
 
         <button
           onClick={onClose}
-          className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all"
+          className="px-4 py-2 rounded-full bg-white border-2 border-[#E8DEFF] hover:bg-[#FFF3D6] text-xs font-bold text-[#263238] transition-all shadow-sm"
         >
-          Exit Focus ✕
+          Done for now ✕
         </button>
       </div>
 
-      {/* Center Main Step Presentation with huge typography */}
-      <div className="max-w-3xl mx-auto w-full my-auto py-12 flex flex-col items-start">
-        {/* Progress Bar */}
-        <div className="w-full h-1.5 bg-white/10 rounded-full mb-10 overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-[#7C3AED] to-[#47BFFF] rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${((currentStepIdx + 1) / totalSteps) * 100}%` }}
-            transition={{ duration: 0.4 }}
-          />
+      {/* Center Main Step Presentation */}
+      <div className="max-w-2xl mx-auto w-full my-auto py-10 flex flex-col items-start">
+        {/* Visual Step Progress Dots */}
+        <div className="flex items-center gap-2 mb-8">
+          {stepList.map((_, i) => (
+            <div
+              key={i}
+              className={`w-3 h-3 rounded-full transition-all ${
+                i === currentStepIdx
+                  ? "bg-[#6C63FF] scale-125"
+                  : i < currentStepIdx
+                  ? "bg-[#2EC4B6]"
+                  : "bg-[#E8DEFF]"
+              }`}
+            />
+          ))}
         </div>
 
+        {/* Current Instruction Box */}
         <motion.div
           key={currentStepIdx}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-6 w-full"
+          className="w-full p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card space-y-4"
         >
-          <span className="text-xs font-mono uppercase tracking-widest text-white/40">
-            Current Micro-Step
+          <span className="text-xs font-bold uppercase tracking-wider text-[#6C63FF] font-sans">
+            Step {currentStepIdx + 1}
           </span>
-          <h2 className="font-display text-3xl sm:text-5xl font-semibold text-white leading-snug">
+          <h2 className="font-display text-2xl sm:text-4xl font-bold text-[#263238] leading-snug">
             {currentStepText}
           </h2>
+          <span className="text-xs font-semibold text-[#546E7A] block pt-2">
+            Take your time. Just this one thing!
+          </span>
         </motion.div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-3 mt-12">
+        <div className="flex flex-wrap items-center gap-3 mt-8">
           <button
             onClick={handleReadStep}
-            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-white border border-white/15 transition-all flex items-center gap-2"
+            className="px-5 py-3 rounded-full bg-white hover:bg-[#FFF3D6] border-2 border-[#E8DEFF] text-xs font-bold text-[#263238] transition-all flex items-center gap-2 shadow-sm"
           >
             <span>🔊</span> Hear it
           </button>
@@ -99,7 +115,7 @@ export default function FocusRoom({
             onClick={() => {
               if (onSwitchModality) onSwitchModality("whiteboard");
             }}
-            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-medium text-white border border-white/15 transition-all flex items-center gap-2"
+            className="px-5 py-3 rounded-full bg-white hover:bg-[#FFF3D6] border-2 border-[#E8DEFF] text-xs font-bold text-[#263238] transition-all flex items-center gap-2 shadow-sm"
           >
             <span>🎨</span> Draw it
           </button>
@@ -112,37 +128,37 @@ export default function FocusRoom({
                 onClose();
               }
             }}
-            className="px-6 py-2.5 rounded-full bg-white text-black font-semibold text-xs hover:bg-white/90 transition-all shadow-lg"
+            className="px-7 py-3 rounded-full bg-[#6C63FF] hover:bg-[#534BD6] text-white font-bold text-xs transition-all shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none"
           >
-            {currentStepIdx < totalSteps - 1 ? "I understand → Next Step" : "Complete Step Room ✓"}
+            {currentStepIdx < totalSteps - 1 ? "I did this! Next step →" : "All steps finished! 🎉"}
           </button>
 
           <button
             onClick={() => {
               if (onImStuck) onImStuck({ stepIndex: currentStepIdx, stepText: currentStepText });
             }}
-            className="px-5 py-2.5 rounded-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-400/40 text-xs font-semibold transition-all"
+            className="px-5 py-3 rounded-full bg-[#FFE0E5] hover:bg-[#FFCCD5] text-[#FF5E7E] font-bold text-xs transition-all"
           >
-            ⚠️ I'm stuck
+            Hmm, I'm stuck 🤔
           </button>
         </div>
       </div>
 
-      {/* Bottom Step Indicator */}
-      <div className="max-w-4xl mx-auto w-full pt-6 border-t border-white/10 flex items-center justify-between text-xs text-white/40">
-        <span>Single-instruction focus view eliminates distraction and cognitive overwhelm.</span>
+      {/* Bottom Reassurance */}
+      <div className="max-w-3xl mx-auto w-full pt-6 border-t border-[#E8DEFF] flex items-center justify-between text-xs text-[#546E7A]">
+        <span>No timers. No pressure. One step at a time.</span>
         <div className="flex gap-2">
           <button
             onClick={() => setCurrentStepIdx(Math.max(0, currentStepIdx - 1))}
             disabled={currentStepIdx === 0}
-            className="px-3 py-1 rounded bg-white/5 disabled:opacity-30 hover:bg-white/10 text-white"
+            className="px-3.5 py-1.5 rounded-full bg-white border border-[#E8DEFF] disabled:opacity-40 font-bold text-xs"
           >
-            Previous
+            Back
           </button>
           <button
             onClick={() => setCurrentStepIdx(Math.min(totalSteps - 1, currentStepIdx + 1))}
             disabled={currentStepIdx === totalSteps - 1}
-            className="px-3 py-1 rounded bg-white/5 disabled:opacity-30 hover:bg-white/10 text-white"
+            className="px-3.5 py-1.5 rounded-full bg-white border border-[#E8DEFF] disabled:opacity-40 font-bold text-xs"
           >
             Next
           </button>

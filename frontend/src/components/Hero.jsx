@@ -1,226 +1,185 @@
 // Hero.jsx
-// Fluxora-inspired cinematic hero for RIFF — Adaptive Neuro-Learning Engine.
-// Fullscreen /hero-loop.mp4 video, oversized display typography with Instrument Serif italic accent,
-// gradient CTA, overlapping proof dots, real telemetry glass stat cards, ghost analytics panel,
-// subtle vertical guide lines, and watermark capability footer strip.
+// Warm, playful digital learning playground hero for kids & teens.
+// Features floating illustrated stationery, welcoming typography, friendly Riff mascot, and cheerful CTAs.
 
 import { motion } from "framer-motion";
+import RiffMascot from "../Mascot.jsx";
 
-export default function Hero({
-  onStartLearning,
-  onExploreAdaptive,
-  understandingConfidence = null,
-  retentionDueCount = 0,
-  behaviorState = {},
-  currentModality = "text",
-}) {
-  const understandingPct = understandingConfidence !== null
-    ? `${Math.round(understandingConfidence * 100)}%`
-    : "—";
-
-  const understandingSub = understandingConfidence !== null
-    ? "Learning Confidence"
-    : "Building baseline";
-
-  const signals = [
-    { label: "Typing Cadence", pct: 85, color: "#9F67FF" },
-    { label: "Focus Rhythm", pct: 70, color: "#47BFFF" },
-    { label: "Comprehension", pct: understandingConfidence !== null ? Math.round(understandingConfidence * 100) : 60, color: "#C084FC" },
-    { label: "Recall Strength", pct: 75, color: "#10B981" },
+export default function Hero({ onStartLearning, onExploreAdaptive }) {
+  const floatingItems = [
+    { emoji: "✏️", label: "Draw", top: "15%", left: "8%", delay: 0 },
+    { emoji: "⭐", label: "Streak", top: "25%", right: "12%", delay: 1 },
+    { emoji: "🪐", label: "Space", bottom: "25%", left: "10%", delay: 2 },
+    { emoji: "📐", label: "Math", top: "65%", right: "8%", delay: 1.5 },
+    { emoji: "💡", label: "Idea", top: "12%", right: "30%", delay: 0.5 },
   ];
 
   return (
-    <section className="relative w-full min-h-screen flex flex-col justify-between overflow-hidden pt-28 pb-10 px-6 sm:px-12 bg-[#07050B]">
-      {/* 1. Subtle Vertical Guide Lines (Fluxora characteristic) */}
-      <div className="absolute inset-0 pointer-events-none z-10 flex justify-between max-w-7xl mx-auto px-6 opacity-30">
-        <div className="w-[1px] h-full bg-gradient-to-b from-transparent via-white/[0.08] to-transparent" />
-        <div className="w-[1px] h-full bg-gradient-to-b from-transparent via-white/[0.05] to-transparent hidden sm:block" />
-        <div className="w-[1px] h-full bg-gradient-to-b from-transparent via-white/[0.05] to-transparent hidden md:block" />
-        <div className="w-[1px] h-full bg-gradient-to-b from-transparent via-white/[0.08] to-transparent" />
-      </div>
+    <section className="relative w-full min-h-[90vh] flex flex-col justify-between overflow-hidden pt-28 pb-12 px-6 sm:px-12 bg-[#FFF9F0]">
+      {/* Background Subtle Gradient Blobs & Floating Learning Toys */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
+        {/* Soft Pastel Background Blobs */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#FFE0E5] opacity-50 blur-3xl" />
+        <div className="absolute top-1/3 -right-24 w-96 h-96 rounded-full bg-[#DCEBFF] opacity-50 blur-3xl" />
+        <div className="absolute -bottom-24 left-1/3 w-96 h-96 rounded-full bg-[#DFF7F0] opacity-50 blur-3xl" />
 
-      {/* 2. Fullscreen Background Video (/hero-loop.mp4) */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <video
-          src="/hero-loop.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="w-full h-full object-cover opacity-40 scale-105"
-        />
-        {/* Multilayer Dark Ember/Purple Vignettes */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07050B] via-[#07050B]/50 to-[#07050B]/70" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(7,5,11,0.8)_100%)]" />
-      </div>
-
-      {/* 3. Hero Main Content Grid */}
-      <div className="relative z-20 max-w-7xl mx-auto w-full flex-1 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-12 my-auto py-10">
-        {/* Left / Main Column */}
-        <div className="max-w-3xl flex flex-col items-start">
-          {/* Eyebrow with horizontal rule */}
+        {/* Floating Items with Gentle Bobbing */}
+        {floatingItems.map((item, i) => (
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center gap-3 mb-6"
+            key={i}
+            style={{ top: item.top, bottom: item.bottom, left: item.left, right: item.right }}
+            animate={{ y: [0, -12, 0], rotate: [0, 6, -6, 0] }}
+            transition={{ repeat: Infinity, duration: 4 + i, delay: item.delay, ease: "easeInOut" }}
+            className="hidden md:flex absolute items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/80 backdrop-blur-sm border border-[#E8DEFF] shadow-card"
           >
-            <span className="w-8 h-[1px] bg-gradient-to-r from-transparent to-[#9F67FF]" />
-            <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold">
-              ✦ ADAPTIVE NEURO-LEARNING ENGINE
+            <span className="text-xl">{item.emoji}</span>
+            <span className="text-[11px] font-bold text-[#546E7A]">{item.label}</span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Hero Content Container */}
+      <div className="relative z-10 max-w-6xl mx-auto w-full flex-1 flex flex-col lg:flex-row items-center justify-between gap-12 my-auto py-8">
+        {/* Left Column: Expressive Headline & CTAs */}
+        <div className="max-w-2xl flex flex-col items-start text-left">
+          {/* Eyebrow */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E8DEFF] border border-[#6C63FF]/20 mb-6 shadow-sm"
+          >
+            <span className="text-sm">✦</span>
+            <span className="text-xs font-bold font-sans tracking-wide text-[#534BD6] uppercase">
+              YOUR LEARNING BUDDY
             </span>
           </motion.div>
 
-          {/* Oversized Headline with Instrument Serif Italic Accent */}
+          {/* Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight text-white leading-[1.04] mb-6"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#263238] leading-[1.08] mb-6"
           >
-            Learning That <br />
-            Adapts{" "}
-            <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-white via-[#E9D5FF] to-[#C084FC]">
-              To You.
+            Learning <br />
+            That Moves{" "}
+            <span className="font-hand font-bold text-[#6C63FF] text-6xl sm:text-7xl lg:text-8xl inline-block transform -rotate-2">
+              With You.
             </span>
           </motion.h1>
 
-          {/* Supporting Description (2-3 lines) */}
+          {/* Supporting Description */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-base sm:text-lg text-white/70 font-light leading-relaxed max-w-xl mb-8"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-base sm:text-lg text-[#546E7A] font-medium leading-relaxed max-w-lg mb-8"
           >
-            Riff observes how you learn, detects when the current approach isn’t working,
-            and changes the way it teaches — in real time.
+            Riff notices when learning gets difficult and changes the way it helps — so you can keep going and feel proud!
           </motion.p>
 
-          {/* CTA & Proof Strip Row */}
+          {/* Action CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-12"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-wrap items-center gap-4 mb-10"
           >
-            {/* Fluxora-style Rounded Gradient CTA */}
             <button
               onClick={onStartLearning}
-              className="group px-7 py-3.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] hover:from-[#8B5CF6] hover:to-[#D8B4FE] text-white font-semibold text-sm transition-all duration-300 shadow-xl shadow-[#7C3AED]/25 hover:shadow-[#7C3AED]/40 hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-3"
+              className="px-8 py-4 rounded-full bg-[#6C63FF] hover:bg-[#534BD6] text-white font-bold text-sm tracking-wide transition-all shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none flex items-center gap-2"
             >
               <span>Start Learning</span>
-              <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs group-hover:translate-x-1 transition-transform">
-                →
-              </span>
+              <span>→</span>
             </button>
 
-            {/* Overlapping Modality Proof Indicators */}
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-2">
-                <span className="w-8 h-8 rounded-full bg-[#7C3AED]/80 border-2 border-[#07050B] flex items-center justify-center text-[10px] text-white shadow" title="Visual Mode">🎨</span>
-                <span className="w-8 h-8 rounded-full bg-[#47BFFF]/80 border-2 border-[#07050B] flex items-center justify-center text-[10px] text-white shadow" title="Audio Mode">🔊</span>
-                <span className="w-8 h-8 rounded-full bg-[#C084FC]/80 border-2 border-[#07050B] flex items-center justify-center text-[10px] text-white shadow" title="Text Mode">📄</span>
-                <span className="w-8 h-8 rounded-full bg-[#10B981]/80 border-2 border-[#07050B] flex items-center justify-center text-[10px] text-white shadow" title="Spaced Recall">🗂️</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-white">Learning differently</span>
-                <span className="text-[11px] text-white/50">Every learner has a different path</span>
-              </div>
-            </div>
+            <button
+              onClick={onExploreAdaptive}
+              className="px-6 py-4 rounded-full bg-white hover:bg-[#FFF3D6] text-[#263238] font-bold text-sm border-2 border-[#E8DEFF] hover:border-[#FFB84D] transition-all shadow-sm"
+            >
+              See How Riff Works ✨
+            </button>
           </motion.div>
 
-          {/* 2 Glassmorphism Real Stat Cards */}
+          {/* Cheerful Friendly Learning Cards */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
             className="grid grid-cols-2 gap-4 w-full max-w-md"
           >
-            {/* Card 1: Real Understanding State */}
-            <div className="p-5 rounded-2xl bg-white/[0.055] border border-white/[0.12] backdrop-blur-xl shadow-lg shadow-black/50">
-              <span className="block font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                {understandingPct}
-              </span>
-              <span className="text-xs font-mono text-white/60 mt-1 block">
-                {understandingSub}
-              </span>
+            <div className="p-4 rounded-3xl bg-white border border-[#DFF7F0] shadow-card flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#DFF7F0] flex items-center justify-center text-xl">
+                🎨
+              </div>
+              <div>
+                <span className="font-display font-bold text-sm text-[#263238] block">Visual & Fun</span>
+                <span className="text-xs text-[#546E7A]">Draw & explore ideas</span>
+              </div>
             </div>
 
-            {/* Card 2: Retention Queue */}
-            <div className="p-5 rounded-2xl bg-white/[0.055] border border-white/[0.12] backdrop-blur-xl shadow-lg shadow-black/50">
-              <span className="block font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                {retentionDueCount}
-              </span>
-              <span className="text-xs font-mono text-white/60 mt-1 block">
-                Reviews Due
-              </span>
+            <div className="p-4 rounded-3xl bg-white border border-[#DCEBFF] shadow-card flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#DCEBFF] flex items-center justify-center text-xl">
+                🪜
+              </div>
+              <div>
+                <span className="font-display font-bold text-sm text-[#263238] block">Tiny Steps</span>
+                <span className="text-xs text-[#546E7A]">No pressure ever</span>
+              </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Right Column: Ghost Analytics Visualization (≥1120px display) */}
+        {/* Right Column: Friendly Interactive Character Visual */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="hidden xl:flex flex-col w-80 p-6 rounded-3xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-2xl shadow-2xl opacity-50 hover:opacity-90 transition-opacity duration-300 pointer-events-auto"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="relative flex flex-col items-center justify-center p-8 sm:p-12 rounded-[40px] bg-gradient-to-b from-white to-[#FFF3D6]/60 border-2 border-[#E8DEFF] shadow-xl max-w-sm w-full"
         >
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#C084FC] font-semibold">
-              ADAPTIVE SIGNALS
-            </span>
-            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
+          {/* Decorative Corner Badges */}
+          <div className="absolute -top-3 -right-3 px-3 py-1 rounded-full bg-[#FF5E7E] text-white text-[11px] font-bold shadow-md transform rotate-6">
+            Always friendly!
           </div>
 
-          {/* Telemetry Progress Bars */}
-          <div className="space-y-3 mb-6">
-            {signals.map((sig) => (
-              <div key={sig.label}>
-                <div className="flex justify-between text-[11px] font-mono text-white/60 mb-1">
-                  <span>{sig.label}</span>
-                  <span>{sig.pct}%</span>
-                </div>
-                <div className="h-1.5 w-full bg-white/[0.06] rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${sig.pct}%`, backgroundColor: sig.color }}
-                  />
-                </div>
-              </div>
-            ))}
+          <RiffMascot size="hero" mood="calm" message="Hey! What are we learning today?" />
+
+          <div className="mt-6 text-center space-y-1">
+            <h3 className="font-display text-xl font-bold text-[#263238]">
+              Meet Riff, Your Buddy
+            </h3>
+            <p className="text-xs text-[#546E7A] leading-relaxed">
+              Whenever a problem feels tricky, Riff suggests pictures, stories, or smaller steps.
+            </p>
           </div>
 
-          <div className="pt-3 border-t border-white/[0.08]">
-            <span className="text-sm font-semibold text-white flex items-center gap-1.5">
-              <span className="text-[#10B981] font-mono">+18%</span> Learning confidence
+          {/* Quick Mood/Strategy Preview Tags */}
+          <div className="flex flex-wrap items-center justify-center gap-1.5 mt-5">
+            <span className="px-2.5 py-1 rounded-full bg-[#DFF7F0] text-[#20A396] text-[11px] font-bold">
+              🌱 No rush
             </span>
-            <span className="text-[11px] text-white/40 block mt-1">
-              Riff is learning what works.
+            <span className="px-2.5 py-1 rounded-full bg-[#E8DEFF] text-[#534BD6] text-[11px] font-bold">
+              ✨ 3 Ways to explain
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-[#FFF3D6] text-[#E08A00] text-[11px] font-bold">
+              🎯 Your pace
             </span>
           </div>
         </motion.div>
       </div>
 
-      {/* 4. Large Low-Opacity Watermark & Capability Strip */}
-      <div className="relative z-20 max-w-7xl mx-auto w-full pt-8 border-t border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-6">
-        {/* Low Opacity Watermark */}
-        <div className="font-display font-black text-4xl sm:text-5xl text-white/[0.08] tracking-widest select-none pointer-events-none">
-          RIFF
+      {/* Bottom Subtle Learning Strip */}
+      <div className="relative z-10 max-w-6xl mx-auto w-full pt-6 border-t border-[#E8DEFF] flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-[#546E7A]">
+        <div className="flex items-center gap-2">
+          <span>🌟</span>
+          <span>Made for young thinkers who learn differently.</span>
         </div>
-
-        {/* Capability Partner-Style Wordmark Strip */}
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-white/40 font-mono">
-          <span className="text-white/20 uppercase tracking-widest text-[10px]">Riff learns through:</span>
-          <span className="hover:text-white transition-colors cursor-default">RiffSense</span>
-          <span className="text-white/20">•</span>
-          <span className="hover:text-white transition-colors cursor-default">RiffAdapt</span>
-          <span className="text-white/20">•</span>
-          <span className="hover:text-white transition-colors cursor-default">RiffFocus</span>
-          <span className="text-white/20">•</span>
-          <span className="hover:text-white transition-colors cursor-default">RiffRecall</span>
-          <span className="text-white/20">•</span>
-          <span className="hover:text-white transition-colors cursor-default">Neuro-Read</span>
+        <div className="flex items-center gap-4">
+          <span className="text-[#6C63FF]">● Visuals</span>
+          <span className="text-[#2EC4B6]">● Voice</span>
+          <span className="text-[#FFB84D]">● Tiny Steps</span>
+          <span className="text-[#FF5E7E]">● Fun Stories</span>
         </div>
       </div>
     </section>

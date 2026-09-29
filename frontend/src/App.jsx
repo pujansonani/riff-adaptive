@@ -1,9 +1,7 @@
 // App.jsx
-// RIFF — Adaptive Neuro-Learning Engine
-// Redesigned with Fluxora visual design principles:
-// Fullscreen /hero-loop.mp4 video, Instrument Serif display typography, centered pill navbar,
-// glassmorphism metric cards, ghost analytics telemetry, vertical guide lines,
-// and real closed-loop adaptive neuro-learning state.
+// RIFF — Your Smart Learning Buddy
+// Designed for K-12 learners who think differently.
+// Warm paper aesthetic, encouraging language, friendly companion, and closed-loop adaptive intelligence.
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { evaluateUnderstanding } from "./understanding";
@@ -161,7 +159,7 @@ export default function App() {
     fontSize: "normal",
     lineHeight: "normal",
     letterSpacing: "normal",
-    fontFamily: "inter",
+    fontFamily: "nunito",
     contrastTheme: "default",
     readingRuler: false,
     bionicFocus: false,
@@ -252,7 +250,7 @@ export default function App() {
       return;
     }
     if (!isSpeechRecognitionSupported()) {
-      setError("Speech recognition is not supported in this browser. Please type directly.");
+      setError("Speech microphone isn't supported in this browser. You can type right in!");
       return;
     }
 
@@ -307,14 +305,14 @@ export default function App() {
 
       const { updated } = createSessionEvent({
         type: "lesson_start",
-        title: `Lesson Riffed: ${interest}`,
-        detail: `Academic content adapted around ${interest} metaphor.`,
+        title: `Made it fun with ${interest}!`,
+        detail: `Turned fraction concept into an exciting ${interest} story.`,
         icon: "⚡",
-        badge: "Riff It",
+        badge: "Story Magic",
       });
       setSessionEvents(updated);
 
-      const updatedConf = recordConfidenceMilestone("Riffed", 0.52, "remix");
+      const updatedConf = recordConfidenceMilestone("Fun Story", 0.55, "remix");
       setConfidencePoints(updatedConf);
 
       handleGenerateFlashcards(data.remix || lesson, interest);
@@ -333,7 +331,7 @@ export default function App() {
 
       setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } catch (err) {
-      setError(`Couldn't reach backend at ${API_BASE}. Is server running?`);
+      setError(`Couldn't reach backend helper at ${API_BASE}. Is the server on?`);
       setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } finally {
       setRemixLoading(false);
@@ -350,10 +348,10 @@ export default function App() {
 
     createSessionEvent({
       type: "modality_switch",
-      title: "Focus Room Activated",
-      detail: "De-cluttered step-by-step sequencing initiated.",
+      title: "Entered Step Room",
+      detail: "Broke the problem down into friendly tiny steps.",
       icon: "🪜",
-      badge: "Focus Mode",
+      badge: "Tiny Steps",
     });
     setSessionEvents(loadSessionEvents());
 
@@ -368,7 +366,7 @@ export default function App() {
       const data = await res.json();
       setSteps(data.steps);
     } catch {
-      setSteps(`1. Identify the core relationship in ${interest || "the concept"}.\n2. Write down your first thought.\n3. Verify the outcome with an example.`);
+      setSteps(`1. Notice what the parts of ${interest || "the concept"} are doing.\n2. Write down your first thought.\n3. Check if your answer makes sense.`);
     } finally {
       setStepsLoading(false);
     }
@@ -417,7 +415,7 @@ export default function App() {
         }
       } catch {}
 
-      setHint(`Start by naming what you know about ${interest || "the concept"} and write that down.`);
+      setHint(`Think of how many pieces you have, and how many make a full set in ${interest || "the problem"}.`);
     } finally {
       setHintLoading(false);
     }
@@ -449,8 +447,8 @@ export default function App() {
         }),
       ]);
 
-      const simplerData = simplerRes.ok ? await simplerRes.json() : { simpler: "Simpler explanation ready." };
-      const quizData = quizRes.ok ? await quizRes.json() : { quiz: "Practice quiz ready." };
+      const simplerData = simplerRes.ok ? await simplerRes.json() : { simpler: "Here is a super simple way to see it." };
+      const quizData = quizRes.ok ? await quizRes.json() : { quiz: "Ready for one quick question?" };
 
       const understanding = evaluateUnderstanding(scratch, source, interest);
       setConfidence(understanding.confidence);
@@ -459,15 +457,15 @@ export default function App() {
       setQuiz(quizData.quiz);
       setShowQuiz(true);
 
-      const updatedConf = recordConfidenceMilestone("Answer Check", understanding.confidence, "practice");
+      const updatedConf = recordConfidenceMilestone("Check In", understanding.confidence, "practice");
       setConfidencePoints(updatedConf);
 
       createSessionEvent({
         type: "understanding_checked",
-        title: `Understanding Checked: ${Math.round(understanding.confidence * 100)}%`,
+        title: `Checked Understanding: ${Math.round(understanding.confidence * 100)}%`,
         detail: understanding.feedback,
         icon: "🎯",
-        badge: "Confidence Check",
+        badge: "Check In",
       });
       setSessionEvents(loadSessionEvents());
 
@@ -491,9 +489,9 @@ export default function App() {
 
       setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } catch (err) {
-      setSimpler("Simpler summary ready.");
-      setQuiz("Quick quiz ready.");
-      setConfidenceFeedback("Understanding evaluated locally.");
+      setSimpler("A quick friendly summary is ready.");
+      setQuiz("A quick practice question is ready.");
+      setConfidenceFeedback("Awesome effort! Riff checked your explanation.");
       setShowQuiz(true);
       setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } finally {
@@ -527,33 +525,33 @@ export default function App() {
         coreIdea: true,
         relationship: evalResult.confidence >= 0.5,
         exampleIncluded: Boolean(interest && teachExplanation.toLowerCase().includes(interest.toLowerCase())),
-        missingDetail: isStrong ? null : "Could include one more step on how the parts interact.",
+        missingDetail: isStrong ? null : "Want to add how the top and bottom numbers talk to each other?",
         confidenceScore: Math.round(evalResult.confidence * 100),
       });
 
-      const updatedConf = recordConfidenceMilestone("Teach-Back", Math.max(0.75, evalResult.confidence), "teachback");
+      const updatedConf = recordConfidenceMilestone("Taught Riff", Math.max(0.75, evalResult.confidence), "teachback");
       setConfidencePoints(updatedConf);
 
       createSessionEvent({
         type: "teachback",
-        title: "Teach-Back Completed",
-        detail: `Explained in own words. Socratic feedback delivered.`,
+        title: "Taught Riff!",
+        detail: `Explained in own words. Riff understood your thinking!`,
         icon: "🗣️",
-        badge: "Teach-Back",
+        badge: "Teach Riff",
       });
       setSessionEvents(loadSessionEvents());
       setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } catch {
       setTeachback({
-        reaction: `That makes a lot of sense for ${interest || "our world"}!`,
-        question: "How would you explain the denominator to someone seeing it for the first time?",
+        reaction: `That makes total sense in ${interest || "our world"}!`,
+        question: "How would you explain it to a friend who has never seen fractions before?",
       });
       setTeachRubric({
         coreIdea: true,
         relationship: true,
         exampleIncluded: true,
         missingDetail: null,
-        confidenceScore: 82,
+        confidenceScore: 85,
       });
       setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } finally {
@@ -570,10 +568,10 @@ export default function App() {
 
     createSessionEvent({
       type: "modality_switch",
-      title: "Concept Bridge Generated",
-      detail: "3-step analogy chain connected to personal interest.",
+      title: "Made a Story Bridge",
+      detail: `Connected concept to ${interest || "real life"}.`,
       icon: "🌉",
-      badge: "Analogy Mode",
+      badge: "Story Bridge",
     });
     setSessionEvents(loadSessionEvents());
 
@@ -590,9 +588,9 @@ export default function App() {
     } catch {
       setBridge({
         steps: [
-          `Everyone understands sharing slices of pizza or items with friends.`,
-          `In ${interest || "your favorite activity"}, pieces and team roles work the exact same way.`,
-          `In math and science, fractions formalize that exact part-to-whole relationship.`,
+          `Think of sharing pizza slices or trading items with your friends.`,
+          `In ${interest || "your favorite game"}, pieces and teams work the exact same way!`,
+          `In math, fractions are just the super clean way to write that down.`,
         ],
       });
     } finally {
@@ -635,10 +633,10 @@ export default function App() {
 
     createSessionEvent({
       type: "modality_switch",
-      title: "Visual Model Rendered",
-      detail: "RiffBoard generated structured schematic diagram.",
+      title: "Drew a Picture",
+      detail: "Created visual diagram on RiffBoard.",
       icon: "🎨",
-      badge: "Visual Model",
+      badge: "Picture",
     });
     setSessionEvents(loadSessionEvents());
 
@@ -650,9 +648,9 @@ export default function App() {
         body: JSON.stringify({ content: source, interest }),
       });
       if (!res.ok) throw new Error("Visualize failed");
-      setVisualFeedback("Generated structured schematic concept model on RiffBoard canvas.");
+      setVisualFeedback("Drew a helpful visual diagram right on your digital notebook!");
     } catch {
-      setVisualFeedback("Rendered visual concept stages on canvas.");
+      setVisualFeedback("Drew visual stages on your notebook.");
     } finally {
       setIsVisualizing(false);
     }
@@ -660,11 +658,11 @@ export default function App() {
 
   const handleAskRiffDrawing = ({ labels }) => {
     if (!labels) {
-      setVisualFeedback("Add a text label or shape to your drawing, then ask Riff!");
+      setVisualFeedback("Add a little word or box to your drawing, then tap Ask Riff!");
       return;
     }
     setVisualFeedback(
-      `Riff noticed labels: "${labels}". You've identified the core parts! Adding arrows between them will clarify the transition sequence.`
+      `Riff loved your drawing of "${labels}"! You’ve got the main pieces down. Drawing an arrow between them will show how they move!`
     );
   };
 
@@ -728,7 +726,7 @@ export default function App() {
 
         setBars((prev) => {
           const next = [...prev.slice(1)];
-          const height = Math.max(6, Math.min(42, interval / 14));
+          const height = Math.max(6, Math.min(38, interval / 16));
           next.push(height);
           return next;
         });
@@ -741,16 +739,16 @@ export default function App() {
             fromModality: currentModality,
             toModality: friction.recommendedSupport === "micro_step" ? "micro-step" : "visual",
             signals,
-            reasonText: "Riff detected typing pacing slowdown and revision bursts compared to your personal baseline.",
+            reasonText: "Riff noticed you paused and made a few corrections — let's try an easier picture or tiny step!",
           });
           setCurrentAdaptationRecord(adaptRecord);
 
           createSessionEvent({
             type: "friction_detected",
-            title: "Friction Detected",
-            detail: `Typing slowed by ${Math.round(signals.deviationPct)}% vs personal baseline.`,
-            icon: "⚠️",
-            badge: "RiffSense Alert",
+            title: "Riff Offered a Hand",
+            detail: `Noticed a pause on this question. Ready to switch to pictures or steps.`,
+            icon: "💡",
+            badge: "Help Ready",
           });
           setSessionEvents(loadSessionEvents());
         }
@@ -812,9 +810,11 @@ export default function App() {
     ? "offered"
     : alertState === "hinted"
     ? "hinted"
+    : confidence !== null && confidence >= 0.7
+    ? "happy"
     : behaviorState.isFrictionDetected
     ? "adapting"
-    : "observing";
+    : "calm";
 
   const fontObj = READ_FONTS.find((f) => f.id === neuroSettings.fontFamily) || READ_FONTS[0];
   const contrastThemeObj = CONTRAST_THEMES.find((t) => t.id === neuroSettings.contrastTheme) || CONTRAST_THEMES[0];
@@ -823,155 +823,171 @@ export default function App() {
   const letterSpacingMap = { normal: "0em", wide: "0.04em", extrawide: "0.09em" };
 
   return (
-    <div className="min-h-screen bg-[#07050B] text-white selection:bg-[#7C3AED]/30 selection:text-white flex flex-col justify-between">
-      {/* 1. FLUXORA CENTERED PILL NAVBAR */}
+    <div className="min-h-screen bg-[#FFF9F0] text-[#263238] selection:bg-[#E8DEFF] selection:text-[#534BD6] flex flex-col justify-between">
+      {/* 1. WARM FRIENDLY NAVBAR */}
       <Navbar
         onNavigate={handleScrollToSection}
         activeSection={activeNav}
         onOpenNeuroRead={() => setNeuroReadOpen(true)}
       />
 
-      {/* 2. CINEMATIC FULLSCREEN VIDEO HERO */}
+      {/* 2. PLAYFUL HERO */}
       <div id="hero">
         <Hero
           onStartLearning={() => handleScrollToSection("learn")}
           onExploreAdaptive={() => handleScrollToSection("adaptive-engine")}
-          understandingConfidence={confidence}
-          retentionDueCount={retentionStats.due}
-          behaviorState={behaviorState}
-          currentModality={currentModality}
         />
       </div>
 
-      {/* Floating System Status Presence */}
+      {/* Floating Mascot Buddy Widget */}
       <div className="fixed bottom-6 right-6 z-40 hidden md:block">
-        <RiffMascot mood={mascotMood} accent={vibeTheme.accent} />
+        <RiffMascot mood={mascotMood} size="md" />
       </div>
 
-      {/* MAIN APPLICATION SECTIONS WRAPPER */}
-      <main className="max-w-7xl mx-auto px-6 sm:px-10 py-16 space-y-24 w-full bg-[#08070B]">
-        {/* Error Banner */}
+      {/* MAIN LEARNING DESK SECTIONS */}
+      <main className="max-w-6xl mx-auto px-6 sm:px-10 py-12 space-y-20 w-full">
+        {/* Error Notification */}
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
+          <div className="p-4 rounded-3xl bg-[#FFE0E5] border border-[#FF5E7E]/30 text-[#FF5E7E] text-xs font-bold flex items-center justify-between shadow-sm">
             <span>{error}</span>
-            <button onClick={() => setError("")} className="text-white/60 hover:text-white">✕</button>
+            <button onClick={() => setError("")} className="text-[#FF5E7E] hover:underline font-bold">✕</button>
           </div>
         )}
 
-        {/* SECTION 1: LEARN & PRACTICE WORKSPACE */}
+        {/* SECTION 1: MY LEARNING DESK */}
         <section id="learn" className="space-y-8 scroll-mt-28">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
+          {/* Header & Continue Learning Card */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E8DEFF] pb-6">
             <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-                01 • Learning Workspace
+              <span className="text-xs font-bold uppercase tracking-wide text-[#6C63FF] px-3.5 py-1 rounded-full bg-[#E8DEFF]">
+                📚 MY DESK
               </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
-                What do you want to learn?
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#263238] mt-2">
+                What are you curious about today?
               </h2>
             </div>
-            <p className="text-xs text-white/50 max-w-md font-light">
-              Paste your concept and your favorite interest. Riff will transform the explanation and dynamically adapt as you practice.
-            </p>
           </div>
 
-          {/* 2-Column Lesson & Adaptive Output */}
+          {/* Continue Learning Card */}
+          <div className="p-6 sm:p-7 rounded-[32px] bg-gradient-to-r from-[#FFF3D6] to-[#DCEBFF] border-2 border-[#FFB84D]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#FFB84D]">Continue Learning</span>
+              <h3 className="font-display text-xl font-bold text-[#263238]">Fractions & Parts of a Whole</h3>
+              <p className="text-xs text-[#546E7A]">Let’s finish what we started together!</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5" title="Progress: 4 of 5 steps">
+                <span className="w-3 h-3 rounded-full bg-[#2EC4B6]" />
+                <span className="w-3 h-3 rounded-full bg-[#2EC4B6]" />
+                <span className="w-3 h-3 rounded-full bg-[#2EC4B6]" />
+                <span className="w-3 h-3 rounded-full bg-[#2EC4B6]" />
+                <span className="w-3 h-3 rounded-full bg-white border border-[#546E7A]" />
+              </div>
+              <button
+                onClick={() => handleScrollToSection("scratch-desk")}
+                className="px-5 py-2.5 rounded-full bg-[#6C63FF] text-white text-xs font-bold shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none"
+              >
+                Continue →
+              </button>
+            </div>
+          </div>
+
+          {/* 2-Column Lesson Input & Personalized Output */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Panel 1: Concept & Interest Input */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl flex flex-col justify-between shadow-xl">
+            {/* Panel 1: Concept & Favorite Thing Input */}
+            <div className="p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card flex flex-col justify-between space-y-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="font-mono text-xs text-white/70 uppercase tracking-wider font-semibold">
-                    1. Academic Concept
+                  <label className="font-display text-sm font-bold text-[#263238]">
+                    1. Topic from school or a book:
                   </label>
                   <button
                     type="button"
                     onClick={() => toggleVoiceInput("lesson")}
-                    className={`px-3 py-1 rounded-full text-[11px] font-mono border transition-all ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
                       voiceTarget === "lesson"
-                        ? "bg-rose-500/20 text-rose-300 border-rose-400 animate-pulse"
-                        : "bg-white/[0.05] text-white/60 border-white/10 hover:text-white"
+                        ? "bg-[#FFE0E5] text-[#FF5E7E] border-[#FF5E7E] animate-pulse"
+                        : "bg-[#FFF9F0] text-[#546E7A] border-[#E8DEFF] hover:bg-[#FFF3D6]"
                     }`}
                   >
-                    🎤 {voiceTarget === "lesson" ? "Listening..." : "Voice Input"}
+                    🎤 {voiceTarget === "lesson" ? "Listening..." : "Speak it"}
                   </button>
                 </div>
                 <textarea
-                  rows={5}
+                  rows={4}
                   value={lesson}
                   onChange={(e) => setLesson(e.target.value)}
-                  placeholder="Explain binary search to me..."
-                  className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all resize-none leading-relaxed"
+                  placeholder="Paste what you're learning (like fractions, volcanoes, photosynthesis)..."
+                  className="w-full p-4 rounded-2xl bg-[#FFF9F0] border-2 border-[#E8DEFF] text-[#263238] font-bold text-xs sm:text-sm focus:outline-none focus:border-[#6C63FF] transition-all resize-none leading-relaxed"
                 />
 
                 <div className="flex items-center justify-between mt-5 mb-2">
-                  <label className="font-mono text-xs text-white/70 uppercase tracking-wider font-semibold">
-                    2. What do you love? (Interest Metaphor)
+                  <label className="font-display text-sm font-bold text-[#263238]">
+                    2. What do you love most?
                   </label>
                   <button
                     type="button"
                     onClick={() => toggleVoiceInput("interest")}
-                    className={`px-3 py-1 rounded-full text-[11px] font-mono border transition-all ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
                       voiceTarget === "interest"
-                        ? "bg-rose-500/20 text-rose-300 border-rose-400 animate-pulse"
-                        : "bg-white/[0.05] text-white/60 border-white/10 hover:text-white"
+                        ? "bg-[#FFE0E5] text-[#FF5E7E] border-[#FF5E7E] animate-pulse"
+                        : "bg-[#FFF9F0] text-[#546E7A] border-[#E8DEFF] hover:bg-[#FFF3D6]"
                     }`}
                   >
-                    🎤 {voiceTarget === "interest" ? "Listening..." : "Voice"}
+                    🎤 {voiceTarget === "interest" ? "Listening..." : "Speak"}
                   </button>
                 </div>
                 <input
                   type="text"
                   value={interest}
                   onChange={(e) => setInterest(e.target.value)}
-                  placeholder="Space exploration, Minecraft, Formula 1, dinosaurs, basketball..."
-                  className="w-full px-4 py-3.5 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all"
+                  placeholder="Minecraft, space, basketball, dinosaurs, baking..."
+                  className="w-full px-4 py-3 rounded-2xl bg-[#FFF9F0] border-2 border-[#E8DEFF] text-[#263238] font-bold text-xs sm:text-sm focus:outline-none focus:border-[#6C63FF] transition-all"
                 />
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/[0.08] flex items-center justify-between gap-4">
-                <button
-                  onClick={handleRemix}
-                  disabled={remixLoading || !lesson.trim() || !interest.trim()}
-                  className="w-full py-3.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white font-semibold text-xs tracking-wider uppercase hover:opacity-90 disabled:opacity-40 disabled:pointer-events-none transition-all duration-300 shadow-xl shadow-[#7C3AED]/20 flex items-center justify-center gap-2"
-                >
-                  {remixLoading ? (
-                    <>
-                      <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                      <span>Riffing & Adapting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>⚡</span>
-                      <span>Riff It (Personalize Concept)</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              <button
+                onClick={handleRemix}
+                disabled={remixLoading || !lesson.trim() || !interest.trim()}
+                className="w-full py-4 rounded-full bg-[#6C63FF] hover:bg-[#534BD6] text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
+              >
+                {remixLoading ? (
+                  <>
+                    <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    <span>Making it fun with {interest}...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>⚡</span>
+                    <span>Remix With My Favorite Thing!</span>
+                  </>
+                )}
+              </button>
             </div>
 
-            {/* Panel 2: Adaptive Output & Neuro-Read */}
+            {/* Panel 2: Remixed Lesson & Easy Reading */}
             <div
-              className="p-6 sm:p-8 rounded-3xl border backdrop-blur-xl flex flex-col justify-between shadow-xl transition-all"
+              className="p-6 sm:p-8 rounded-[36px] border-2 shadow-card flex flex-col justify-between space-y-4 transition-all"
               style={{
                 backgroundColor: contrastThemeObj.bg,
                 borderColor: contrastThemeObj.border,
               }}
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
-                    2. Adaptive Remixed Lesson
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-display text-sm font-bold text-[#6C63FF]">
+                    Your Story Lesson
                   </span>
-                  {remix && (
-                    <span className="text-[10px] font-mono text-white/40 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10">
-                      Metaphor: {interest}
+                  {interest && (
+                    <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-[#FFF3D6] text-[#E08A00]">
+                      ✨ {interest} edition
                     </span>
                   )}
                 </div>
 
                 <div
-                  className={`min-h-[160px] p-5 rounded-2xl bg-black/30 border border-white/[0.06] transition-all leading-relaxed ${
-                    neuroSettings.readingRuler ? "ring-2 ring-[#9F67FF]/40" : ""
+                  className={`min-h-[160px] p-5 rounded-2xl bg-white/70 border border-black/5 transition-all leading-relaxed ${
+                    neuroSettings.readingRuler ? "ring-2 ring-[#6C63FF]" : ""
                   }`}
                   style={{
                     fontFamily: fontObj.family,
@@ -982,15 +998,15 @@ export default function App() {
                   }}
                 >
                   {remixLoading ? (
-                    <div className="flex items-center gap-3 text-white/50 text-sm italic">
-                      <span className="w-4 h-4 rounded-full border-2 border-[#C084FC] border-t-transparent animate-spin" />
-                      <span>Reshaping academic structure around {interest}...</span>
+                    <div className="flex items-center gap-3 text-[#546E7A] text-sm font-bold">
+                      <span className="w-4 h-4 rounded-full border-2 border-[#6C63FF] border-t-transparent animate-spin" />
+                      <span>Cooking up a fun explanation with {interest}...</span>
                     </div>
                   ) : remix ? (
                     speechCharIndex >= 0 ? (
                       <span>
                         <span>{remix.slice(0, speechCharIndex)}</span>
-                        <mark className="bg-[#7C3AED]/40 text-white rounded px-1">
+                        <mark className="bg-[#FFF3D6] text-[#263238] rounded px-1 font-bold">
                           {remix.slice(speechCharIndex, speechCharIndex + 14)}
                         </mark>
                         <span>{remix.slice(speechCharIndex + 14)}</span>
@@ -999,32 +1015,32 @@ export default function App() {
                       remix
                     )
                   ) : (
-                    <span className="text-white/40 text-sm italic">
-                      Your personalized, interest-remixed lesson will appear here once you type your concept & interest and hit "Riff It".
+                    <span className="text-[#546E7A] text-xs sm:text-sm font-medium">
+                      Type your topic and your favorite hobby above, then tap "Remix" to see it transformed into a friendly story!
                     </span>
                   )}
                 </div>
 
-                {/* Suggested Modalities Strip */}
+                {/* Suggested Modalities */}
                 {remix && (
-                  <div className="mt-4 pt-4 border-t border-white/[0.08]">
-                    <span className="block text-[11px] font-mono text-white/50 uppercase mb-2">
-                      Try:
+                  <div className="mt-4 pt-3 border-t border-black/5">
+                    <span className="block text-xs font-bold text-[#546E7A] uppercase mb-2">
+                      Try exploring this as:
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {[
-                        { id: "visual", label: "🎨 Visual" },
-                        { id: "analogy", label: "🌉 Analogy" },
-                        { id: "text", label: "📄 Simple" },
-                        { id: "interactive", label: "🎮 Interactive" },
+                        { id: "visual", label: "🎨 Draw It" },
+                        { id: "analogy", label: "🌉 Fun Story" },
+                        { id: "text", label: "📄 Simple Text" },
+                        { id: "audio", label: "🔊 Read Aloud" },
                       ].map((m) => (
                         <button
                           key={m.id}
                           onClick={() => handleExplainThreeWays(m.id)}
-                          className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${
                             currentModality === m.id
-                              ? "bg-[#7C3AED] text-white border-[#9F67FF]"
-                              : "bg-white/[0.04] border-white/10 text-white/70 hover:text-white hover:bg-white/10"
+                              ? "bg-[#6C63FF] text-white border-[#534BD6] shadow-sm"
+                              : "bg-[#FFF9F0] border-[#E8DEFF] text-[#263238] hover:bg-[#FFF3D6]"
                           }`}
                         >
                           {m.label}
@@ -1035,15 +1051,15 @@ export default function App() {
                 )}
               </div>
 
-              {/* Actions, Audio, Translation */}
+              {/* Actions & Reading Comfort Toggle */}
               {remix && !remixLoading && (
-                <div className="mt-4 pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+                <div className="pt-3 border-t border-black/5 flex flex-wrap items-center justify-between gap-3">
                   <button
                     onClick={handleReadAloud}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                    className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
                       speaking
-                        ? "bg-rose-500/20 text-rose-300 border-rose-400"
-                        : "bg-white/[0.06] text-white border-white/10 hover:bg-white/10"
+                        ? "bg-[#FFE0E5] text-[#FF5E7E] border-[#FF5E7E]"
+                        : "bg-[#DFF7F0] text-[#20A396] border-[#BAEFE2] hover:bg-[#C2F2E4]"
                     }`}
                   >
                     <span>{speaking ? "⏹" : "🔊"}</span>
@@ -1054,7 +1070,7 @@ export default function App() {
                     <select
                       value={translateLang}
                       onChange={(e) => setTranslateLang(e.target.value)}
-                      className="px-3 py-1.5 rounded-full bg-black/40 border border-white/10 text-xs text-white focus:outline-none"
+                      className="px-3 py-1.5 rounded-full bg-[#FFF9F0] border border-[#E8DEFF] text-xs font-bold text-[#263238] focus:outline-none"
                     >
                       {LANGUAGES.map((lang) => (
                         <option key={lang} value={lang}>{lang}</option>
@@ -1063,7 +1079,7 @@ export default function App() {
                     <button
                       onClick={handleRemix}
                       disabled={translateLoading}
-                      className="px-3.5 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-xs text-white/80"
+                      className="px-3.5 py-1.5 rounded-full bg-[#E8DEFF] text-[#534BD6] text-xs font-bold hover:bg-[#D8C4FF]"
                     >
                       Translate
                     </button>
@@ -1071,7 +1087,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* Neuro-Read Accessibility Controls */}
+              {/* Easy Reading Controls */}
               <NeuroReadControls
                 settings={neuroSettings}
                 onChange={setNeuroSettings}
@@ -1081,24 +1097,24 @@ export default function App() {
             </div>
           </div>
 
-          {/* Practice Scratchpad & Real-Time Observer */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl space-y-6 shadow-xl">
+          {/* Practice Thinking Scratchpad */}
+          <div id="scratch-desk" className="p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
-                  3. Practice & Thinking Scratchpad
+                <span className="font-display text-sm font-bold text-[#6C63FF]">
+                  3. Practice Scratchpad
                 </span>
-                <p className="text-xs text-white/50 mt-1">
-                  Work through your thinking below. Riff quietly tracks your interaction cadence against your personal baseline.
+                <p className="text-xs text-[#546E7A] mt-0.5">
+                  Try solving or explaining the idea below. Riff quietly watches your pace so it can help if you get stuck.
                 </p>
               </div>
 
               <button
                 onClick={() => toggleVoiceInput("scratch")}
-                className={`px-4 py-1.5 rounded-full text-xs font-mono border transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-bold border transition-all ${
                   voiceTarget === "scratch"
-                    ? "bg-rose-500/20 text-rose-300 border-rose-400 animate-pulse"
-                    : "bg-white/[0.05] text-white/70 border-white/10 hover:text-white"
+                    ? "bg-[#FFE0E5] text-[#FF5E7E] border-[#FF5E7E] animate-pulse"
+                    : "bg-[#FFF9F0] text-[#546E7A] border-[#E8DEFF] hover:bg-[#FFF3D6]"
                 }`}
               >
                 🎤 {voiceTarget === "scratch" ? "Listening to Answer..." : "Speak Answer"}
@@ -1110,151 +1126,152 @@ export default function App() {
               value={scratch}
               onChange={(e) => setScratch(e.target.value)}
               onKeyDown={handleScratchKeyDown}
-              placeholder="Start typing your explanation or solution. Riff observes interaction friction and will offer support if you get stuck..."
-              className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all resize-none leading-relaxed"
+              placeholder="Start typing your answer here. No worries about spelling or mistakes — Riff is here to help!"
+              className="w-full p-4 rounded-2xl bg-[#FFF9F0] border-2 border-[#E8DEFF] text-[#263238] font-bold text-xs sm:text-sm focus:outline-none focus:border-[#6C63FF] transition-all resize-none leading-relaxed"
             />
 
-            {/* Live Pacing Waveform */}
-            <div className="p-3 rounded-xl bg-black/30 border border-white/[0.06] flex items-center justify-between gap-4">
+            {/* Gentle Rhythm Waveform */}
+            <div className="p-3 rounded-2xl bg-[#FFF9F0] border border-[#E8DEFF] flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono text-white/40 uppercase">Live Cadence:</span>
-                <div className="flex items-end gap-1 h-8">
+                <span className="text-[10px] font-bold text-[#546E7A] uppercase">Pace Rhythm:</span>
+                <div className="flex items-end gap-1 h-7">
                   {bars.map((h, i) => (
                     <div
                       key={i}
                       className="w-1.5 rounded-full transition-all duration-150"
                       style={{
                         height: `${h}px`,
-                        backgroundColor: behaviorState.isFrictionDetected ? "#F43F5E" : "#10B981",
+                        backgroundColor: behaviorState.isFrictionDetected ? "#FF5E7E" : "#2EC4B6",
                       }}
                     />
                   ))}
                 </div>
               </div>
 
-              <span className="text-[11px] font-mono text-white/50">
+              <span className="text-xs font-bold text-[#546E7A]">
                 {behaviorState.isFrictionDetected ? (
-                  <span className="text-rose-400 font-semibold">⚠️ Pacing slowed vs baseline</span>
+                  <span className="text-[#FF5E7E]">💡 Paused on this step — ready to help</span>
                 ) : (
-                  <span className="text-emerald-400">● Rhythm steady</span>
+                  <span className="text-[#20A396]">● Nice steady rhythm</span>
                 )}
               </span>
             </div>
 
+            {/* Action Row */}
             <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleSubmitAnswer}
                   disabled={!scratch.trim() || simplerLoading || quizLoading}
-                  className="px-6 py-2.5 rounded-full bg-white text-black font-semibold text-xs uppercase tracking-wider hover:bg-white/90 disabled:opacity-40 transition-all shadow-lg shadow-white/10"
+                  className="px-6 py-3 rounded-full bg-[#6C63FF] text-white font-bold text-xs uppercase tracking-wider shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none disabled:opacity-40"
                 >
-                  Submit & Check Understanding
+                  Check My Thinking ✨
                 </button>
                 <button
                   onClick={handleOpenFocusRoom}
-                  className="px-5 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition-all backdrop-blur-md"
+                  className="px-5 py-3 rounded-full bg-[#FFF9F0] hover:bg-[#FFF3D6] border-2 border-[#E8DEFF] text-xs font-bold text-[#263238] transition-all shadow-sm"
                 >
-                  🪜 Enter Focus Room
+                  🪜 Take Tiny Steps
                 </button>
               </div>
 
               <button
                 onClick={handleHintRequest}
                 disabled={hintLoading}
-                className="text-xs font-mono text-[#C084FC] hover:text-white underline"
+                className="text-xs font-bold text-[#6C63FF] hover:underline"
               >
-                {hintLoading ? "Thinking..." : "💡 Need a hint?"}
+                {hintLoading ? "Thinking of a hint..." : "💡 Need a hint?"}
               </button>
             </div>
 
-            {/* STUCK RESCUE FLOW BANNER */}
+            {/* FRIENDLY STUCK RESCUE FLOW */}
             {alertState === "offered" && (
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-rose-950/40 via-purple-950/40 to-[#0D0912] border border-rose-500/40 backdrop-blur-xl">
-                <div className="flex items-center gap-2 text-rose-300 text-xs font-mono uppercase tracking-wider font-bold mb-2">
-                  <span>⚠️</span> Riff noticed friction in your pacing
+              <div className="p-6 rounded-3xl bg-gradient-to-r from-[#FFF3D6] via-[#FFE0E5] to-[#E8DEFF] border-2 border-[#FFB84D]/40 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#263238] uppercase">
+                  <span>💡</span> Let’s try a different way!
                 </div>
-                <p className="text-sm text-white/90 mb-4">
-                  Let’s try a different way that matches how you learn best:
+                <p className="text-sm font-bold text-[#263238]">
+                  You seem a little stuck here. How would you like Riff to help?
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2.5 pt-1">
                   <button
                     onClick={() => {
                       handleScrollToSection("riffboard");
                       handleVisualizeConcept();
                     }}
-                    className="px-4 py-2 rounded-full bg-white text-black text-xs font-semibold hover:bg-white/90 transition-all shadow-lg"
+                    className="px-5 py-2.5 rounded-full bg-white text-[#263238] font-bold text-xs border border-[#E8DEFF] hover:bg-[#FFF3D6] shadow-sm"
                   >
-                    🎨 Show me visually
+                    🎨 Show me with pictures
                   </button>
                   <button
                     onClick={handleOpenFocusRoom}
-                    className="px-4 py-2 rounded-full bg-white/[0.1] hover:bg-white/[0.2] border border-white/20 text-xs font-medium text-white"
+                    className="px-5 py-2.5 rounded-full bg-white text-[#263238] font-bold text-xs border border-[#E8DEFF] hover:bg-[#FFF3D6] shadow-sm"
                   >
-                    🧩 Break into steps
+                    🪜 Break into tiny steps
                   </button>
                   <button
                     onClick={handleBridge}
-                    className="px-4 py-2 rounded-full bg-white/[0.1] hover:bg-white/[0.2] border border-white/20 text-xs font-medium text-white"
+                    className="px-5 py-2.5 rounded-full bg-white text-[#263238] font-bold text-xs border border-[#E8DEFF] hover:bg-[#FFF3D6] shadow-sm"
                   >
-                    🌉 Explain with analogy
+                    🌉 Tell a fun story
                   </button>
                   <button
                     onClick={handleReadAloud}
-                    className="px-4 py-2 rounded-full bg-white/[0.1] hover:bg-white/[0.2] border border-white/20 text-xs font-medium text-white"
+                    className="px-5 py-2.5 rounded-full bg-white text-[#263238] font-bold text-xs border border-[#E8DEFF] hover:bg-[#FFF3D6] shadow-sm"
                   >
-                    🔊 Hear explanation
+                    🔊 Read out loud
                   </button>
                   <button
                     onClick={() => setAlertState("calm")}
-                    className="px-4 py-2 rounded-full text-xs font-medium text-white/50 hover:text-white"
+                    className="px-4 py-2.5 rounded-full text-xs font-bold text-[#546E7A] hover:text-[#263238]"
                   >
-                    Keep going
+                    Keep going my way
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Feedback & Understanding Check Outputs */}
+            {/* Feedback & Understanding Output */}
             {(confidence !== null || simpler || quiz || alertState === "hinted") && (
-              <div className="space-y-4 pt-4 border-t border-white/[0.08]">
+              <div className="space-y-4 pt-4 border-t border-[#E8DEFF]">
                 {alertState === "hinted" && (
-                  <div className="p-4 rounded-2xl bg-[#7C3AED]/20 border border-[#9F67FF]/30 text-sm text-[#C084FC]">
-                    <strong className="block text-xs font-mono uppercase text-[#C084FC] mb-1">Focused Hint</strong>
+                  <div className="p-4 rounded-2xl bg-[#DFF7F0] border border-[#BAEFE2] text-xs font-bold text-[#20A396]">
+                    <strong className="block uppercase text-[10px] text-[#20A396] mb-1">Friendly Hint:</strong>
                     {hintLoading ? "Formulating hint..." : hint}
                   </div>
                 )}
 
                 {confidence !== null && (
-                  <div className="p-5 rounded-2xl bg-[#7C3AED]/15 border border-[#9F67FF]/30 space-y-2">
+                  <div className="p-5 rounded-3xl bg-[#FFF3D6] border border-[#FFB84D]/30 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono uppercase text-[#C084FC] font-bold">
-                        Understanding Assessment
+                      <span className="text-xs font-bold uppercase text-[#E08A00]">
+                        Great Effort!
                       </span>
-                      <span className="font-mono text-sm font-bold text-white">
-                        {Math.round(confidence * 100)}% Learning Confidence
+                      <span className="font-display text-sm font-bold text-[#263238]">
+                        {Math.round(confidence * 100)}% Mastered
                       </span>
                     </div>
-                    <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden">
+                    <div className="h-2.5 w-full bg-white rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#7C3AED] to-[#10B981] rounded-full transition-all duration-700"
+                        className="h-full bg-gradient-to-r from-[#FFB84D] to-[#2EC4B6] rounded-full transition-all duration-700"
                         style={{ width: `${Math.round(confidence * 100)}%` }}
                       />
                     </div>
-                    <p className="text-xs text-white/80 leading-relaxed pt-1">{confidenceFeedback}</p>
+                    <p className="text-xs text-[#546E7A] font-bold pt-1">{confidenceFeedback}</p>
                   </div>
                 )}
 
                 {simpler && (
-                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-sm text-white/90">
-                    <strong className="block text-xs font-mono uppercase text-white/50 mb-1">Simpler Breakdown</strong>
+                  <div className="p-4 rounded-2xl bg-[#FFF9F0] border border-[#E8DEFF] text-xs text-[#263238] font-bold">
+                    <strong className="block text-[#6C63FF] uppercase text-[10px] mb-1">Simple Way to See It:</strong>
                     {simpler}
                   </div>
                 )}
 
                 {showQuiz && (
-                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-sm text-white/90">
-                    <strong className="block text-xs font-mono uppercase text-white/50 mb-1">Practice Quiz</strong>
-                    {quizLoading ? "Generating question..." : quiz}
+                  <div className="p-4 rounded-2xl bg-[#FFF9F0] border border-[#E8DEFF] text-xs text-[#263238] font-bold">
+                    <strong className="block text-[#6C63FF] uppercase text-[10px] mb-1">Quick Practice Question:</strong>
+                    {quizLoading ? "Thinking of a question..." : quiz}
                   </div>
                 )}
               </div>
@@ -1264,17 +1281,17 @@ export default function App() {
           {/* Multimodal Teach Riff & AI Lab */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Teach Riff Card */}
-            <div className="lg:col-span-2 p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl space-y-4 shadow-xl">
+            <div className="lg:col-span-2 p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
-                    Now teach it back. You explain. Riff listens.
+                  <span className="font-display text-sm font-bold text-[#6C63FF]">
+                    4. Teach Riff!
                   </span>
-                  <p className="text-xs text-white/50 mt-0.5">
-                    Explain the concept in your own words to verify your mental model.
+                  <p className="text-xs text-[#546E7A] mt-0.5">
+                    If you can explain it, you really know it! Teach Riff like you're explaining to a friend.
                   </p>
                 </div>
-                <div className="flex items-center gap-1 bg-black/40 border border-white/10 p-1 rounded-xl">
+                <div className="flex items-center gap-1 bg-[#FFF9F0] p-1 rounded-2xl border border-[#E8DEFF]">
                   {["type", "voice", "draw"].map((mode) => (
                     <button
                       key={mode}
@@ -1282,10 +1299,10 @@ export default function App() {
                         if (mode === "draw") handleScrollToSection("riffboard");
                         else setTeachMode(mode);
                       }}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all ${
+                      className={`px-3 py-1 rounded-xl text-xs font-bold capitalize transition-all ${
                         teachMode === mode
-                          ? "bg-[#7C3AED] text-white"
-                          : "text-white/60 hover:text-white"
+                          ? "bg-[#6C63FF] text-white shadow-sm"
+                          : "text-[#546E7A] hover:text-[#263238]"
                       }`}
                     >
                       {mode}
@@ -1298,76 +1315,76 @@ export default function App() {
                 rows={3}
                 value={teachExplanation}
                 onChange={(e) => setTeachExplanation(e.target.value)}
-                placeholder={`Teach this concept in your own words to a friendly buddy from ${interest || "your world"}...`}
-                className="w-full p-4 rounded-2xl bg-black/40 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#C084FC] transition-all resize-none leading-relaxed"
+                placeholder={`Explain this concept in your own words to Riff...`}
+                className="w-full p-4 rounded-2xl bg-[#FFF9F0] border-2 border-[#E8DEFF] text-[#263238] font-bold text-xs sm:text-sm focus:outline-none focus:border-[#6C63FF] transition-all resize-none leading-relaxed"
               />
 
               <div className="flex items-center justify-between">
                 <button
                   onClick={handleTeachback}
                   disabled={!teachExplanation.trim() || teachbackLoading}
-                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#C084FC] text-white font-semibold text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-40 transition-all shadow-lg shadow-[#7C3AED]/20"
+                  className="px-6 py-3 rounded-full bg-[#6C63FF] text-white font-bold text-xs uppercase tracking-wider shadow-bouncy-purple hover:translate-y-0.5 active:translate-y-1 active:shadow-none disabled:opacity-40"
                 >
-                  {teachbackLoading ? "Listening & Assessing..." : "Teach It to Riff"}
+                  {teachbackLoading ? "Listening carefully..." : "Teach Riff! ✨"}
                 </button>
                 {teachMode === "voice" && (
                   <button
                     onClick={() => toggleVoiceInput("teach")}
-                    className="px-3.5 py-1.5 rounded-full text-xs font-mono bg-rose-500/20 text-rose-300 border border-rose-400"
+                    className="px-4 py-2 rounded-full text-xs font-bold bg-[#FFE0E5] text-[#FF5E7E] border border-[#FF5E7E]"
                   >
                     🎤 {voiceTarget === "teach" ? "Listening..." : "Speak"}
                   </button>
                 )}
               </div>
 
-              {/* Educational Rubric */}
+              {/* Friendly Rubric */}
               {teachRubric && (
-                <div className="mt-4 p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-white">What Riff Heard:</span>
-                    <span className="text-[#10B981] font-mono">{teachRubric.confidenceScore}% Learning Confidence</span>
+                <div className="mt-4 p-4 rounded-2xl bg-[#DFF7F0] border border-[#BAEFE2] space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#20A396]">
+                    <span>What Riff Understood:</span>
+                    <span>{teachRubric.confidenceScore}% Crystal Clear!</span>
                   </div>
-                  <ul className="text-xs space-y-1 text-white/80">
-                    <li className="text-emerald-300">✓ Core idea clearly stated</li>
-                    <li className={teachRubric.relationship ? "text-emerald-300" : "text-amber-300"}>
-                      {teachRubric.relationship ? "✓" : "△"} Relationship connected
+                  <ul className="text-xs space-y-1 text-[#263238] font-semibold">
+                    <li className="text-[#20A396]">✓ Main idea clearly explained!</li>
+                    <li className={teachRubric.relationship ? "text-[#20A396]" : "text-[#E08A00]"}>
+                      {teachRubric.relationship ? "✓" : "△"} Connected the pieces together
                     </li>
-                    <li className={teachRubric.exampleIncluded ? "text-emerald-300" : "text-amber-300"}>
-                      {teachRubric.exampleIncluded ? "✓" : "△"} Example applied
+                    <li className={teachRubric.exampleIncluded ? "text-[#20A396]" : "text-[#E08A00]"}>
+                      {teachRubric.exampleIncluded ? "✓" : "△"} Used a real-world example
                     </li>
                     {teachRubric.missingDetail && (
-                      <li className="text-[#C084FC]">💡 {teachRubric.missingDetail}</li>
+                      <li className="text-[#6C63FF]">💡 {teachRubric.missingDetail}</li>
                     )}
                   </ul>
                 </div>
               )}
 
               {teachback && (
-                <div className="p-4 rounded-2xl bg-[#7C3AED]/15 border border-[#9F67FF]/30 text-xs text-[#C084FC] leading-relaxed italic">
+                <div className="p-4 rounded-2xl bg-[#FFF3D6] border border-[#FFB84D]/40 text-xs font-bold text-[#263238] leading-relaxed">
                   “{teachback.reaction}” {teachback.question}
                 </div>
               )}
             </div>
 
             {/* AI Lab: Debug My Thinking */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.035] border border-white/[0.1] backdrop-blur-xl space-y-4 shadow-xl flex flex-col justify-between">
+            <div className="p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-card space-y-4 flex flex-col justify-between">
               <div>
-                <span className="font-mono text-xs text-[#C084FC] uppercase tracking-wider font-semibold">
+                <span className="font-display text-sm font-bold text-[#6C63FF]">
                   Debug My Thinking
                 </span>
-                <p className="text-xs text-white/50 mt-1">
-                  Pinpoint the exact misconception behind your draft without generic grades.
+                <p className="text-xs text-[#546E7A] mt-0.5">
+                  Let's figure out what got mixed up without generic test grades.
                 </p>
-                <div className="mt-4 p-4 rounded-2xl bg-black/40 border border-white/10 text-xs text-white/80 leading-relaxed min-h-[90px]">
+                <div className="mt-4 p-4 rounded-2xl bg-[#FFF9F0] border border-[#E8DEFF] text-xs font-bold text-[#263238] leading-relaxed min-h-[90px]">
                   {diagnoseLoading ? (
-                    <span className="text-white/50 italic">Diagnosing conceptual gaps...</span>
+                    <span className="text-[#546E7A]">Riff is looking over your thoughts...</span>
                   ) : diagnose ? (
                     <div>
-                      <strong className="block text-rose-300 mb-1">{diagnose.misconception}</strong>
-                      <span className="text-white/70">{diagnose.fix}</span>
+                      <strong className="block text-[#FF5E7E] mb-1">{diagnose.misconception}</strong>
+                      <span className="text-[#546E7A]">{diagnose.fix}</span>
                     </div>
                   ) : (
-                    <span className="text-white/40 italic">Type in the scratchpad, then hit below to locate misconceptions.</span>
+                    <span className="text-[#546E7A]">Write in the scratchpad, then tap below to find tricky spots!</span>
                   )}
                 </div>
               </div>
@@ -1385,36 +1402,22 @@ export default function App() {
                     const d = await res.json();
                     setDiagnose(d);
                   } catch {
-                    setDiagnose({ misconception: "Check parts vs whole", fix: "Verify numerator tells how many parts, denominator tells total." });
+                    setDiagnose({ misconception: "Check parts vs whole", fix: "Remember: top tells parts you have, bottom tells all parts." });
                   } finally {
                     setDiagnoseLoading(false);
                   }
                 }}
                 disabled={!scratch.trim() || diagnoseLoading}
-                className="w-full py-3 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition-all"
+                className="w-full py-3.5 rounded-full bg-[#FFF3D6] hover:bg-[#FFE6A3] border-2 border-[#FFB84D]/40 text-xs font-bold text-[#263238] transition-all shadow-sm"
               >
-                {diagnoseLoading ? "Diagnosing..." : "Find My Misconception"}
+                {diagnoseLoading ? "Checking..." : "Let's figure it out ✨"}
               </button>
             </div>
           </div>
         </section>
 
-        {/* SECTION 2: ADAPTIVE ENGINE HUB */}
+        {/* SECTION 2: HOW RIFF HELPS */}
         <section id="adaptive-engine" className="space-y-8 scroll-mt-28">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
-            <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-                02 • Central Intelligence
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
-                Riff doesn't just teach. It adapts.
-              </h2>
-            </div>
-            <p className="text-xs text-white/50 max-w-md font-light">
-              Continuous telemetry calculates interaction friction, dynamically shifting modalities between spatial, textual, audio, and micro-step representations.
-            </p>
-          </div>
-
           <AdaptiveEngineHub
             autopilotState={autopilotState}
             behaviorState={behaviorState}
@@ -1434,22 +1437,8 @@ export default function App() {
           />
         </section>
 
-        {/* SECTION 3: SMART RIFFBOARD */}
+        {/* SECTION 3: DRAW IT OUT */}
         <section id="riffboard" className="space-y-8 scroll-mt-28">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
-            <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-                03 • Creative Canvas
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
-                Smart RiffBoard Workspace
-              </h2>
-            </div>
-            <p className="text-xs text-white/50 max-w-md font-light">
-              Draw and structure your conceptual models. Ask Riff for real-time visual assessment or generate structured schematics automatically.
-            </p>
-          </div>
-
           <Whiteboard
             concept={remix || lesson}
             interest={interest}
@@ -1460,22 +1449,8 @@ export default function App() {
           />
         </section>
 
-        {/* SECTION 4: RECALL & RETENTION */}
+        {/* SECTION 4: CAN YOU REMEMBER? */}
         <section id="recall" className="space-y-8 scroll-mt-28">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
-            <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-                04 • Spaced Memory
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
-                Remember what you learned.
-              </h2>
-            </div>
-            <p className="text-xs text-white/50 max-w-md font-light">
-              Scientifically scheduled retrieval queues prevent forgetting loops through progressive 5m → 1d → 3d → 7d → 14d intervals.
-            </p>
-          </div>
-
           <RecallView
             cards={flashcards}
             onGenerateCards={() => handleGenerateFlashcards(remix || lesson, interest)}
@@ -1484,22 +1459,8 @@ export default function App() {
           />
         </section>
 
-        {/* SECTION 5: LEARNING DNA */}
+        {/* SECTION 5: HOW YOU LIKE TO LEARN */}
         <section id="dna" className="space-y-8 scroll-mt-28">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
-            <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-                05 • Learner Profile
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
-                Your Learning DNA
-              </h2>
-            </div>
-            <p className="text-xs text-white/50 max-w-md font-light">
-              Dynamic modality affinities computed from real performance outcomes — not fixed diagnostic labels.
-            </p>
-          </div>
-
           <LearningDNA
             profile={modalityProfile}
             onSelectModality={(mod) => {
@@ -1509,27 +1470,8 @@ export default function App() {
           />
         </section>
 
-        {/* SECTION 6: JOURNEY & TIMELINE */}
+        {/* SECTION 6: MY LEARNING STORY */}
         <section id="timeline" className="space-y-8 scroll-mt-28">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
-            <div>
-              <span className="text-[11px] font-mono tracking-widest uppercase text-[#C084FC] font-semibold px-3 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-                06 • Telemetry & History
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-white font-bold mt-3">
-                Learning Journey & Timeline
-              </h2>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setDemoModeOpen(true)}
-                className="px-4 py-1.5 rounded-full bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border border-[#9F67FF]/40 text-xs font-semibold text-[#C084FC] transition-all backdrop-blur-md"
-              >
-                ⚖️ Open Judge Demo Mode
-              </button>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <ConfidenceJourney points={confidencePoints} />
             <AdaptiveTimeline
@@ -1540,6 +1482,15 @@ export default function App() {
                 setConfidencePoints([]);
               }}
             />
+          </div>
+
+          <div className="text-center pt-4">
+            <button
+              onClick={() => setDemoModeOpen(true)}
+              className="px-5 py-2.5 rounded-full bg-white hover:bg-[#FFF3D6] border-2 border-[#E8DEFF] text-xs font-bold text-[#546E7A] hover:text-[#263238] transition-all shadow-sm"
+            >
+              ⚖️ Open Judge Demo Mode
+            </button>
           </div>
         </section>
       </main>
@@ -1579,17 +1530,12 @@ export default function App() {
       />
 
       {/* FOOTER */}
-      <footer className="border-t border-white/[0.08] mt-24 py-12 px-6 sm:px-12 bg-black/60 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
-          <div className="flex items-center gap-2">
-            <span className="font-display text-base font-bold text-white">RIFF</span>
-            <span className="text-[#9F67FF]">•</span>
-            <span>Adaptive Neuro-Learning Engine</span>
-          </div>
-          <span>
-            Telemetry compared strictly against your own personal baseline — never to anyone else's.
-          </span>
+      <footer className="border-t border-[#E8DEFF] mt-24 py-12 px-6 sm:px-12 bg-white text-center text-xs text-[#546E7A] font-semibold space-y-2">
+        <div className="flex items-center justify-center gap-2">
+          <span className="font-display text-base font-bold text-[#263238]">Riff<span className="text-[#FF5E7E]">.</span></span>
+          <span>your friendly learning companion</span>
         </div>
+        <p>Learning doesn’t have to look the same for everyone. Riff moves with you!</p>
       </footer>
     </div>
   );

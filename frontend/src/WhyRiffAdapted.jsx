@@ -1,5 +1,5 @@
 // WhyRiffAdapted.jsx
-// Student-friendly explainability modal for Riff Autopilot.
+// Simple, transparent, child-friendly explanation of why Riff switched teaching strategies.
 
 import { motion } from "framer-motion";
 
@@ -19,98 +19,98 @@ export default function WhyRiffAdapted({
   } = adaptationRecord;
 
   const modalityNames = {
-    text: "Text Explanation",
-    visual: "Visual Diagram (RiffBoard)",
-    "micro-step": "Step-by-Step Focus Mode",
-    analogy: "Concept Bridge (Analogy)",
-    audio: "Audio Read Aloud",
-    interactive: "Interactive Challenge",
-    "teach-back": "Teach It Back",
-    retrieval: "Quick Recall Flashcards",
+    text: "Reading the text",
+    visual: "Drawing with pictures",
+    "micro-step": "Breaking into tiny steps",
+    analogy: "Connecting to a fun story",
+    audio: "Listening out loud",
+    interactive: "Interactive game",
+    "teach-back": "Teaching Riff",
+    retrieval: "Quick memory check",
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-[#263238]/60 backdrop-blur-sm flex items-center justify-center p-4">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-xl p-6 sm:p-8 rounded-3xl bg-[#0D0912] border border-white/15 shadow-2xl shadow-black relative"
+        className="w-full max-w-lg p-6 sm:p-8 rounded-[36px] bg-white border-2 border-[#E8DEFF] shadow-2xl space-y-6 relative"
       >
-        <div className="flex items-center justify-between mb-4">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[#C084FC] font-bold px-2.5 py-1 rounded-full bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-            TRANSPARENT AI
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-wide text-[#6C63FF] px-3.5 py-1 rounded-full bg-[#E8DEFF]">
+            💡 RIFF'S THINKING
           </span>
-          <button onClick={onClose} className="text-white/40 hover:text-white text-lg">
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-[#FFF9F0] hover:bg-[#FFE0E5] text-[#546E7A] hover:text-[#FF5E7E] flex items-center justify-center font-bold text-sm"
+          >
             ✕
           </button>
         </div>
 
-        <h3 className="font-display text-2xl text-white font-bold mb-4">
-          Why did Riff change the explanation?
+        <h3 className="font-display text-2xl font-bold text-[#263238]">
+          Why did Riff change this?
         </h3>
 
-        {/* Transition Bubble */}
-        <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-white/[0.04] border border-white/10 mb-6">
+        {/* Change Transition Card */}
+        <div className="p-4 rounded-3xl bg-[#FFF9F0] border border-[#E8DEFF] flex items-center justify-between gap-4">
           <div>
-            <span className="block font-mono text-[10px] uppercase text-white/40">From Strategy</span>
-            <span className="font-semibold text-sm text-white">{modalityNames[fromModality] || fromModality}</span>
+            <span className="text-[10px] font-bold text-[#546E7A] uppercase block">Started with</span>
+            <strong className="text-sm font-display text-[#263238]">{modalityNames[fromModality] || fromModality}</strong>
           </div>
-          <span className="text-[#C084FC] text-xl">➔</span>
+          <span className="text-2xl text-[#6C63FF]">➔</span>
           <div>
-            <span className="block font-mono text-[10px] uppercase text-[#C084FC]">To Strategy</span>
-            <span className="font-semibold text-sm text-[#47BFFF]">{modalityNames[toModality] || toModality}</span>
+            <span className="text-[10px] font-bold text-[#6C63FF] uppercase block">Switched to</span>
+            <strong className="text-sm font-display text-[#2EC4B6]">{modalityNames[toModality] || toModality}</strong>
           </div>
         </div>
 
-        {/* Observed Signals */}
-        <div className="mb-4">
-          <span className="block text-xs font-semibold uppercase font-mono text-white/70 mb-2">
+        {/* What Riff Noticed */}
+        <div className="space-y-2">
+          <span className="text-xs font-bold text-[#263238] uppercase">
             Riff noticed:
           </span>
-          <ul className="space-y-1.5 pl-4 text-xs text-white/70 list-disc">
+          <ul className="space-y-1.5 pl-4 text-xs text-[#546E7A] font-semibold list-disc">
             {observedSignals.map((sig, i) => (
               <li key={i}>{sig}</li>
             ))}
           </ul>
         </div>
 
-        {/* Pedagogical Rationale */}
-        <div className="mb-6 p-4 rounded-xl bg-[#7C3AED]/15 border border-[#9F67FF]/30">
-          <span className="block text-xs font-semibold text-[#C084FC] mb-1">
-            💡 So Riff changed the teaching style:
-          </span>
-          <p className="text-xs text-white/90 leading-relaxed m-0">{reasonText}</p>
+        {/* Friendly explanation */}
+        <div className="p-4 rounded-2xl bg-[#DFF7F0] border border-[#DFF7F0] text-xs text-[#20A396] font-bold leading-relaxed">
+          ✨ {reasonText || "A different style might make this click way faster!"}
         </div>
 
-        {/* Feedback buttons */}
-        <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="text-xs text-white/50">Did this adaptation help you?</span>
+        {/* Friendly Feedback Buttons */}
+        <div className="pt-4 border-t border-[#E8DEFF] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span className="text-xs font-bold text-[#546E7A]">Did this help?</span>
           <div className="flex gap-2">
             <button
               onClick={() => {
                 if (onProvideFeedback) onProvideFeedback("helped");
                 onClose();
               }}
-              className="px-3.5 py-1.5 rounded-full bg-white text-black text-xs font-semibold hover:bg-white/90"
+              className="px-4 py-2 rounded-full bg-[#DFF7F0] text-[#20A396] text-xs font-bold hover:bg-[#C2F2E4]"
             >
-              👍 Yes, it helped
+              👍 Yes, loved it!
             </button>
             <button
               onClick={() => {
                 if (onProvideFeedback) onProvideFeedback("somewhat");
                 onClose();
               }}
-              className="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs"
+              className="px-4 py-2 rounded-full bg-[#FFF3D6] text-[#E08A00] text-xs font-bold hover:bg-[#FFE6A3]"
             >
-              👌 Somewhat
+              👌 A little
             </button>
             <button
               onClick={() => {
                 if (onProvideFeedback) onProvideFeedback("not_really");
                 onClose();
               }}
-              className="px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/50 text-xs"
+              className="px-4 py-2 rounded-full bg-[#FFE0E5] text-[#FF5E7E] text-xs font-bold hover:bg-[#FFCCD5]"
             >
               👎 Not really
             </button>
