@@ -1,7 +1,7 @@
 // WhyRiffAdapted.jsx
-// Explainability layer for Riff Autopilot:
-// Shows the learner exactly which real behavioral signals were observed
-// and why a specific adaptation was chosen.
+// Explainability modal for Riff Autopilot.
+
+import { motion } from "framer-motion";
 
 export default function WhyRiffAdapted({
   adaptationRecord,
@@ -30,83 +30,93 @@ export default function WhyRiffAdapted({
   };
 
   return (
-    <div className="riff-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="why-adapted-title">
-      <div className="riff-explain-card">
-        <div className="riff-explain-header">
-          <div className="riff-hub-badge">EXPLAINABLE ADAPTIVE AI</div>
-          <h3 id="why-adapted-title" className="riff-explain-title">
-            Why Riff Changed Its Teaching Strategy
-          </h3>
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="w-full max-w-xl p-6 sm:p-8 rounded-3xl bg-[#0e0e12] border border-white/15 shadow-2xl shadow-black relative"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-indigo-400 font-bold px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30">
+            EXPLAINABLE AI
+          </span>
+          <button onClick={onClose} className="text-white/40 hover:text-white text-lg">
+            ✕
+          </button>
         </div>
 
-        <div className="riff-explain-transition-row">
-          <div className="modality-bubble from">
-            <span className="bubble-lbl">Previous Strategy</span>
-            <span className="bubble-name">{modalityNames[fromModality] || fromModality}</span>
+        <h3 className="font-serif text-2xl text-white font-normal mb-4">
+          Why Riff Changed Its Teaching Strategy
+        </h3>
+
+        {/* Transition Bubble */}
+        <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-white/[0.04] border border-white/10 mb-6">
+          <div>
+            <span className="block font-mono text-[10px] uppercase text-white/40">From Strategy</span>
+            <span className="font-semibold text-sm text-white">{modalityNames[fromModality] || fromModality}</span>
           </div>
-          <div className="transition-arrow">➔</div>
-          <div className="modality-bubble to">
-            <span className="bubble-lbl">Adapted Strategy</span>
-            <span className="bubble-name">{modalityNames[toModality] || toModality}</span>
+          <span className="text-indigo-400 text-xl">➔</span>
+          <div>
+            <span className="block font-mono text-[10px] uppercase text-indigo-300">To Strategy</span>
+            <span className="font-semibold text-sm text-emerald-400">{modalityNames[toModality] || toModality}</span>
           </div>
         </div>
 
-        {/* Signals Observed */}
-        <div className="riff-explain-section">
-          <span className="explain-section-title">🔍 Real Signals Riff Observed:</span>
-          <ul className="explain-signals-list">
+        {/* Observed Signals */}
+        <div className="mb-4">
+          <span className="block text-xs font-semibold uppercase font-mono text-white/70 mb-2">
+            🔍 Observed Interaction Signals:
+          </span>
+          <ul className="space-y-1.5 pl-4 text-xs text-white/60 list-disc">
             {observedSignals.map((sig, i) => (
               <li key={i}>{sig}</li>
             ))}
           </ul>
         </div>
 
-        {/* Reasoning */}
-        <div className="riff-explain-section">
-          <span className="explain-section-title">💡 Pedagogical Rationale:</span>
-          <p className="explain-reason-text">{reasonText}</p>
+        {/* Pedagogical Rationale */}
+        <div className="mb-6 p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30">
+          <span className="block text-xs font-semibold text-indigo-300 mb-1">
+            💡 Pedagogical Rationale:
+          </span>
+          <p className="text-xs text-white/80 leading-relaxed m-0">{reasonText}</p>
         </div>
 
-        {/* Feedback to close loop */}
-        <div className="riff-explain-feedback">
-          <span>Did this adaptation help your understanding?</span>
-          <div className="feedback-btn-group">
+        {/* Feedback buttons */}
+        <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span className="text-xs text-white/50">Did this change help you?</span>
+          <div className="flex gap-2">
             <button
-              className="riff-btn-small accept"
               onClick={() => {
                 if (onProvideFeedback) onProvideFeedback("helped");
                 onClose();
               }}
+              className="px-3.5 py-1.5 rounded-full bg-white text-black text-xs font-semibold hover:bg-white/90"
             >
               👍 Yes, it helped
             </button>
             <button
-              className="riff-btn-small ghost"
               onClick={() => {
                 if (onProvideFeedback) onProvideFeedback("somewhat");
                 onClose();
               }}
+              className="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs"
             >
               👌 Somewhat
             </button>
             <button
-              className="riff-btn-small dismiss"
               onClick={() => {
                 if (onProvideFeedback) onProvideFeedback("not_really");
                 onClose();
               }}
+              className="px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/50 text-xs"
             >
               👎 Not really
             </button>
           </div>
         </div>
-
-        <div className="riff-explain-actions">
-          <button className="riff-btn-small dismiss" onClick={onClose}>
-            Close
-          </button>
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
