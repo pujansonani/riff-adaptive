@@ -1,0 +1,12 @@
+{
+  "name": "riff-fullstack",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "test": "node --test frontend/src/*.test.js",
+    "build": "npm run build --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}
