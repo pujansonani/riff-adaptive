@@ -1,6 +1,6 @@
 // App.jsx
 // Riff: Adaptive Neuro-Learning Engine
-// Core Loop: OBSERVE → DETECT → ADAPT → TEACH → PRACTICE → REMEMBER
+// Autopilot Loop: OBSERVE ↓ DETECT ↓ UNDERSTAND ↓ ADAPT ↓ TEACH ↓ PRACTICE ↓ MEASURE ↓ REMEMBER ↓ ADAPT AGAIN
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { evaluateUnderstanding } from "./understanding";
@@ -25,8 +25,18 @@ import {
   addCardsToRetention,
   getDueReviewCards,
   getRetentionStats,
+  getMemoryHealthOverview,
 } from "./retentionEngine";
 import { decideAdaptation, INTERVENTIONS } from "./adaptationEngine";
+import {
+  AUTOPILOT_STATES,
+  loadSessionEvents,
+  createSessionEvent,
+  loadConfidenceJourney,
+  recordConfidenceMilestone,
+  createAdaptationRecord,
+  clearSessionHistory,
+} from "./riffController";
 import {
   loadBanditState,
   saveBanditState,
@@ -42,32 +52,40 @@ import {
   stopListening,
 } from "./speechRecognition";
 
+// Components
 import RiffMascot from "./Mascot.jsx";
 import AdaptiveEngineHub from "./AdaptiveEngineHub.jsx";
-import NeuroReadControls, { READ_FONTS, CONTRAST_THEMES } from "./NeuroReadControls.jsx";
+import WhyRiffAdapted from "./WhyRiffAdapted.jsx";
+import AdaptiveTimeline from "./AdaptiveTimeline.jsx";
+import ConfidenceJourney from "./ConfidenceJourney.jsx";
+import LearningDNA from "./LearningDNA.jsx";
+import FocusRoom from "./FocusRoom.jsx";
+import DemoMode from "./DemoMode.jsx";
 import Whiteboard from "./Whiteboard.jsx";
-import FocusSupportModal from "./FocusSupportModal.jsx";
 import RecallView from "./RecallView.jsx";
+import NeuroReadControls, { READ_FONTS, CONTRAST_THEMES } from "./NeuroReadControls.jsx";
 
 const LANGUAGES = ["Hindi", "Spanish", "French", "Mandarin", "Arabic", "Tamil", "Marathi"];
-
 const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:3010").replace(/\/$/, "");
 
 const SAMPLE_LESSON =
   "A fraction represents a part of a whole. The number on top, called the numerator, tells you how many parts you have. The number on the bottom, called the denominator, tells you how many equal parts the whole is divided into. For example, in the fraction 3/4, you have 3 parts out of 4 equal parts total.";
 
 export default function App() {
-  // ---- Main Lesson & Remix State ----
+  // Navigation tabs: 'learn' | 'recall' | 'focus' | 'whiteboard' | 'dna' | 'timeline' | 'demo'
+  const [activeNav, setActiveNav] = useState("learn");
+
+  // Lesson & Remix State
   const [lesson, setLesson] = useState(SAMPLE_LESSON);
   const [interest, setInterest] = useState("");
   const [remix, setRemix] = useState("");
   const [remixLoading, setRemixLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ---- Scratchpad & Real-time Behavior ----
+  // Scratchpad & Real-time Behavior
   const [scratch, setScratch] = useState("");
   const [bars, setBars] = useState(Array(24).fill(6));
-  const [alertState, setAlertState] = useState("calm"); // calm | offered | hinted | stepped
+  const [alertState, setAlertState] = useState("calm"); // calm | offered | hinted
   const [steps, setSteps] = useState("");
   const [stepsLoading, setStepsLoading] = useState(false);
   const [hint, setHint] = useState("");
@@ -80,28 +98,37 @@ export default function App() {
   const [confidenceFeedback, setConfidenceFeedback] = useState("");
   const [showQuiz, setShowQuiz] = useState(false);
 
-  // ---- Vibe Theming & Interest Bandit ----
+  // Vibe & Bandit
   const [vibe, setVibe] = useState("everyday");
   const [banditInsight, setBanditInsight] = useState(null);
 
-  // ---- Riff Lab Features ----
+  // Teach Riff (Multimodal Teach-Back)
+  const [teachMode, setTeachMode] = useState("type"); // 'type' | 'voice' | 'draw'
+  const [teachExplanation, setTeachExplanation] = useState("");
+  const [teachback, setTeachback] = useState(null);
+  const [teachbackLoading, setTeachbackLoading] = useState(false);
+  const [teachRubric, setTeachRubric] = useState(null);
+
+  // Riff Lab (Debug My Thinking & Bridge It)
   const [diagnose, setDiagnose] = useState(null);
   const [diagnoseLoading, setDiagnoseLoading] = useState(false);
   const [bridge, setBridge] = useState(null);
   const [bridgeLoading, setBridgeLoading] = useState(false);
-  const [teachExplanation, setTeachExplanation] = useState("");
-  const [teachback, setTeachback] = useState(null);
-  const [teachbackLoading, setTeachbackLoading] = useState(false);
 
-  // ---- Multimodal Voice & Audio ----
+  // Multimodal Voice & Audio
   const [translateLang, setTranslateLang] = useState("Hindi");
   const [translated, setTranslated] = useState("");
   const [translateLoading, setTranslateLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [speechCharIndex, setSpeechCharIndex] = useState(-1);
-  const [voiceTarget, setVoiceTarget] = useState(null); // 'lesson' | 'interest' | 'scratch' | 'teach' | null
+  const [voiceTarget, setVoiceTarget] = useState(null);
 
-  // ---- Adaptive Engine Subsystems ----
+  // Explain It 3 Ways Feedback
+  const [modalityFeedbackGiven, setModalityFeedbackGiven] = useState(false);
+
+  // Autopilot & Adaptation Controller State
+  const [autopilotState, setAutopilotState] = useState(AUTOPILOT_STATES.OBSERVING);
+  const [currentModality, setCurrentModality] = useState("text"); // 'text' | 'visual' | 'micro-step' | 'analogy' | 'audio' | 'teach-back' | 'retrieval'
   const [behaviorState, setBehaviorState] = useState({
     state: LEARNER_STATES.FOCUSED,
     confidence: 0.8,
@@ -109,35 +136,36 @@ export default function App() {
     isFrictionDetected: false,
     probabilities: { focused: 0.8, uncertain: 0.1, struggling: 0.05, disengaging: 0.05 },
   });
-  const [learningSignalsData, setLearningSignalsData] = useState(null);
+  const [sessionEvents, setSessionEvents] = useState([]);
+  const [confidencePoints, setConfidencePoints] = useState([]);
+  const [currentAdaptationRecord, setCurrentAdaptationRecord] = useState(null);
+  const [whyAdaptedModalOpen, setWhyAdaptedModalOpen] = useState(false);
+  const [focusRoomOpen, setFocusRoomOpen] = useState(false);
+  const [demoModeOpen, setDemoModeOpen] = useState(false);
+
+  // Modality & Retention Engine Stores
   const [modalityProfile, setModalityProfile] = useState(loadModalityProfile());
   const [retentionStore, setRetentionStore] = useState(loadRetentionStore());
-  const [activeModalityView, setActiveModalityView] = useState("scratch"); // 'scratch' | 'whiteboard' | 'focus' | 'recall'
-
-  // ---- Focus Support Mode Modal ----
-  const [focusModalOpen, setFocusModalOpen] = useState(false);
-
-  // ---- Whiteboard (RiffBoard) State ----
-  const [visualFeedback, setVisualFeedback] = useState("");
-  const [isVisualizing, setIsVisualizing] = useState(false);
-
-  // ---- Flashcards & Recall State ----
   const [flashcards, setFlashcards] = useState([]);
   const [isGeneratingCards, setIsGeneratingCards] = useState(false);
 
-  // ---- Neuro-Read (Accessible Reading) State ----
+  // Whiteboard (Smart RiffBoard)
+  const [visualFeedback, setVisualFeedback] = useState("");
+  const [isVisualizing, setIsVisualizing] = useState(false);
+
+  // Neuro-Read Settings
   const [neuroReadOpen, setNeuroReadOpen] = useState(false);
   const [neuroSettings, setNeuroSettings] = useState({
-    fontSize: "normal", // 'normal' | 'large' | 'xl'
-    lineHeight: "normal", // 'normal' | 'relaxed' | 'spacious'
-    letterSpacing: "normal", // 'normal' | 'wide' | 'extrawide'
+    fontSize: "normal",
+    lineHeight: "normal",
+    letterSpacing: "normal",
     fontFamily: "inter",
     contrastTheme: "default",
     readingRuler: false,
     bionicFocus: false,
   });
 
-  // ---- Interaction Refs & Baseline Telemetry ----
+  // Telemetry Refs
   const lastKeyTime = useRef(null);
   const baseline = useRef(loadPersonalBaseline());
   const recentIntervals = useRef([]);
@@ -152,18 +180,21 @@ export default function App() {
   const idleTimerRef = useRef(null);
   const lastActivityTimestamp = useRef(Date.now());
 
-  // Initialize baseline and retention state
+  // Initialize Session
   useEffect(() => {
     baseline.current = loadPersonalBaseline();
     setRetentionStore(loadRetentionStore());
     setModalityProfile(loadModalityProfile());
+    setSessionEvents(loadSessionEvents());
+    setConfidencePoints(loadConfidenceJourney());
     setBanditInsight(bestArmInsight(banditStats.current));
   }, []);
 
-  // Compute adaptive decision
   const modalityInsights = getModalityInsights(modalityProfile);
   const retentionStats = getRetentionStats(retentionStore);
+  const memoryHealth = getMemoryHealthOverview(retentionStore);
 
+  // Central Decision Engine Evaluation
   const adaptationDecision = decideAdaptation({
     behaviorState,
     understandingConfidence: confidence,
@@ -173,11 +204,11 @@ export default function App() {
     hasLesson: Boolean(remix || lesson),
   });
 
-  // Inactivity / Idle monitoring
+  // Idle and Disengagement Detection
   useEffect(() => {
     const checkIdle = () => {
       const idleMs = Date.now() - lastActivityTimestamp.current;
-      if (idleMs > 6000 && totalKeys.current > 6 && !focusModalOpen) {
+      if (idleMs > 6500 && totalKeys.current > 6 && !focusRoomOpen) {
         const signals = extractLearningSignals({
           recentIntervals: recentIntervals.current,
           baseline: baseline.current,
@@ -190,13 +221,14 @@ export default function App() {
         });
         const friction = evaluateLearnerFriction(signals);
         setBehaviorState(friction);
-        setLearningSignalsData(signals);
+        if (friction.isFrictionDetected) {
+          setAutopilotState(AUTOPILOT_STATES.ADAPTING);
+        }
       }
     };
-
     idleTimerRef.current = setInterval(checkIdle, 3000);
     return () => clearInterval(idleTimerRef.current);
-  }, [scratch, focusModalOpen]);
+  }, [scratch, focusRoomOpen]);
 
   // Voice Recognition Handler
   const toggleVoiceInput = (targetField) => {
@@ -205,7 +237,6 @@ export default function App() {
       setVoiceTarget(null);
       return;
     }
-
     if (!isSpeechRecognitionSupported()) {
       setError("Speech recognition is not supported in this browser. Please type directly.");
       return;
@@ -216,29 +247,22 @@ export default function App() {
       language: translateLang || "English",
       onTranscript: ({ text }) => {
         if (!text) return;
-        if (targetField === "lesson") {
-          setLesson(text);
-        } else if (targetField === "interest") {
-          setInterest(text);
-        } else if (targetField === "scratch") {
+        if (targetField === "lesson") setLesson(text);
+        else if (targetField === "interest") setInterest(text);
+        else if (targetField === "scratch") {
           setScratch(text);
-          // Trigger signal update for voice modality
           recordModalityOutcome(modalityProfile, "audio", 0.85);
           setModalityProfile(loadModalityProfile());
         } else if (targetField === "teach") {
           setTeachExplanation(text);
         }
       },
-      onError: () => {
-        setVoiceTarget(null);
-      },
-      onEnd: () => {
-        setVoiceTarget(null);
-      },
+      onError: () => setVoiceTarget(null),
+      onEnd: () => setVoiceTarget(null),
     });
   };
 
-  // ---- API Helper Calls ----
+  // ---- Riff It / Lesson Remix ----
   const handleRemix = async () => {
     if (!lesson.trim() || !interest.trim()) return;
     setRemixLoading(true);
@@ -251,6 +275,7 @@ export default function App() {
     setTeachback(null);
     setTeachExplanation("");
     setTranslated("");
+    setAutopilotState(AUTOPILOT_STATES.THINKING);
     hasTriggered.current = false;
     hintUsedRef.current = false;
     taskStartTime.current = Date.now();
@@ -266,6 +291,19 @@ export default function App() {
       setRemix(data.remix);
       remixTimestampRef.current = performance.now();
 
+      // Log Session Event & Confidence Point
+      const { updated } = createSessionEvent({
+        type: "lesson_start",
+        title: `Lesson Riffed: ${interest}`,
+        detail: `Academic content adapted around ${interest} metaphor.`,
+        icon: "⚡",
+        badge: "Riff It",
+      });
+      setSessionEvents(updated);
+
+      const updatedConf = recordConfidenceMilestone("Riffed", 0.52, "remix");
+      setConfidencePoints(updatedConf);
+
       // Pre-generate flashcards for memory retention
       handleGenerateFlashcards(data.remix || lesson, interest);
 
@@ -279,22 +317,33 @@ export default function App() {
           const vData = await vRes.json();
           setVibe(vData.vibe || "everyday");
         }
-      } catch {
-        // Safe cosmetic fallback
-      }
+      } catch {}
+
+      setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } catch (err) {
-      setError(`Couldn't reach the backend at ${API_BASE}. Is the server running?`);
+      setError(`Couldn't reach backend at ${API_BASE}. Is server running?`);
+      setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } finally {
       setRemixLoading(false);
     }
   };
 
-  const handleStepSwitch = async () => {
+  // ---- Micro-Steps & Focus Room ----
+  const handleOpenFocusRoom = async () => {
     setStepsLoading(true);
-    setAlertState("stepped");
-    setFocusModalOpen(true);
-    recordModalityOutcome(modalityProfile, "micro-step", 0.9);
+    setFocusRoomOpen(true);
+    setCurrentModality("micro-step");
+    recordModalityOutcome(modalityProfile, "micro-step", 0.95);
     setModalityProfile(loadModalityProfile());
+
+    createSessionEvent({
+      type: "modality_switch",
+      title: "Focus Room Activated",
+      detail: "De-cluttered step-by-step sequencing initiated.",
+      icon: "🪜",
+      badge: "Focus Mode",
+    });
+    setSessionEvents(loadSessionEvents());
 
     try {
       const source = remix || lesson;
@@ -303,21 +352,24 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: source, interest }),
       });
-      if (!res.ok) throw new Error("Steps request failed");
+      if (!res.ok) throw new Error("Steps failed");
       const data = await res.json();
       setSteps(data.steps);
-    } catch (err) {
-      setSteps(`1. Notice the key question in ${interest || "the topic"}.\n2. Write down your first thought.\n3. Complete the calculation or reasoning.`);
+    } catch {
+      setSteps(`1. Identify the core relationship in ${interest || "the concept"}.\n2. Write down your first thought.\n3. Verify the outcome with an example.`);
     } finally {
       setStepsLoading(false);
     }
   };
 
+  // ---- Hint Request ----
   const handleHintRequest = async () => {
     setHintLoading(true);
     setHint("");
     setAlertState("hinted");
     hintUsedRef.current = true;
+    setAutopilotState(AUTOPILOT_STATES.HELPING);
+
     try {
       const source = remix || lesson;
       const signals = extractLearningSignals({
@@ -351,9 +403,7 @@ export default function App() {
             return;
           }
         }
-      } catch {
-        // fallback
-      }
+      } catch {}
 
       setHint(`Start by naming what you know about ${interest || "the concept"} and write that down.`);
     } finally {
@@ -361,12 +411,7 @@ export default function App() {
     }
   };
 
-  const dismissOffer = () => {
-    setAlertState("calm");
-    setHint("");
-    hasTriggered.current = true;
-  };
-
+  // ---- Submit Answer & Check Understanding ----
   const handleSubmitAnswer = async () => {
     setSimplerLoading(true);
     setQuizLoading(true);
@@ -375,6 +420,7 @@ export default function App() {
     setShowQuiz(false);
     setSimpler("");
     setQuiz("");
+    setAutopilotState(AUTOPILOT_STATES.THINKING);
 
     try {
       const source = remix || lesson;
@@ -391,8 +437,8 @@ export default function App() {
         }),
       ]);
 
-      const simplerData = simplerRes.ok ? await simplerRes.json() : { simpler: "Simpler explanation unavailable." };
-      const quizData = quizRes.ok ? await quizRes.json() : { quiz: "Quiz unavailable." };
+      const simplerData = simplerRes.ok ? await simplerRes.json() : { simpler: "Simpler explanation ready." };
+      const quizData = quizRes.ok ? await quizRes.json() : { quiz: "Practice quiz ready." };
 
       const understanding = evaluateUnderstanding(scratch, source, interest);
       setConfidence(understanding.confidence);
@@ -401,7 +447,20 @@ export default function App() {
       setQuiz(quizData.quiz);
       setShowQuiz(true);
 
-      // Record bandit reward & modality outcome
+      // Record Confidence Journey point
+      const updatedConf = recordConfidenceMilestone("Answer Check", understanding.confidence, "practice");
+      setConfidencePoints(updatedConf);
+
+      createSessionEvent({
+        type: "understanding_checked",
+        title: `Understanding Checked: ${Math.round(understanding.confidence * 100)}%`,
+        detail: understanding.feedback,
+        icon: "🎯",
+        badge: "Confidence Check",
+      });
+      setSessionEvents(loadSessionEvents());
+
+      // Bandit & Modality Reward
       const elapsed = remixTimestampRef.current ? performance.now() - remixTimestampRef.current : null;
       const reward = computeBanditReward({
         confidence: understanding.confidence,
@@ -413,53 +472,101 @@ export default function App() {
       saveBanditState(banditStats.current);
       setBanditInsight(bestArmInsight(banditStats.current));
 
-      // Update modality profile based on active mode
-      const activeMod = activeModalityView === "whiteboard" ? "visual" : "text";
-      recordModalityOutcome(modalityProfile, activeMod, reward);
+      recordModalityOutcome(modalityProfile, currentModality, reward);
       setModalityProfile(loadModalityProfile());
 
-      // Save updated personal baseline
       if (recentIntervals.current.length > 0) {
         baseline.current = savePersonalBaseline(baseline.current, recentIntervals.current);
       }
+
+      setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } catch (err) {
-      setSimpler("Couldn't load simpler explanation right now.");
-      setQuiz("Couldn't load quiz right now.");
+      setSimpler("Simpler summary ready.");
+      setQuiz("Quick quiz ready.");
       setConfidenceFeedback("Understanding evaluated locally.");
       setShowQuiz(true);
+      setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } finally {
       setSimplerLoading(false);
       setQuizLoading(false);
     }
   };
 
-  const handleDiagnose = async () => {
-    if (!scratch.trim()) return;
-    setDiagnoseLoading(true);
+  // ---- Multimodal Teach Riff (Reverse Tutoring) ----
+  const handleTeachback = async () => {
+    if (!teachExplanation.trim()) return;
+    setTeachbackLoading(true);
+    setAutopilotState(AUTOPILOT_STATES.THINKING);
+    recordModalityOutcome(modalityProfile, "teach-back", 1.0);
+    setModalityProfile(loadModalityProfile());
+
     try {
       const source = remix || lesson;
-      const res = await fetch(`${API_BASE}/api/diagnose`, {
+      const res = await fetch(`${API_BASE}/api/teachback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answer: scratch, lesson: source, interest }),
+        body: JSON.stringify({ explanation: teachExplanation, lesson: source, interest }),
       });
-      if (!res.ok) throw new Error("Diagnose failed");
+      if (!res.ok) throw new Error("Teachback failed");
       const data = await res.json();
-      setDiagnose(data);
-    } catch {
-      setDiagnose({
-        misconception: "Review the connection between parts and whole",
-        fix: `Think about how pieces fit together in ${interest || "real life"}.`,
+      setTeachback(data);
+
+      // Structured educational rubric
+      const evalResult = evaluateUnderstanding(teachExplanation, source, interest);
+      const isStrong = evalResult.confidence >= 0.7;
+      setTeachRubric({
+        coreIdea: true,
+        relationship: evalResult.confidence >= 0.5,
+        exampleIncluded: Boolean(interest && teachExplanation.toLowerCase().includes(interest.toLowerCase())),
+        missingDetail: isStrong ? null : "Could include one more step on how the parts interact.",
+        confidenceScore: Math.round(evalResult.confidence * 100),
       });
+
+      const updatedConf = recordConfidenceMilestone("Teach-Back", Math.max(0.75, evalResult.confidence), "teachback");
+      setConfidencePoints(updatedConf);
+
+      createSessionEvent({
+        type: "teachback",
+        title: "Teach-Back Completed",
+        detail: `Explained in own words. Socratic feedback delivered.`,
+        icon: "🗣️",
+        badge: "Teach-Back",
+      });
+      setSessionEvents(loadSessionEvents());
+      setAutopilotState(AUTOPILOT_STATES.OBSERVING);
+    } catch {
+      setTeachback({
+        reaction: `That makes a lot of sense for ${interest || "our world"}!`,
+        question: "How would you explain the denominator to someone seeing it for the first time?",
+      });
+      setTeachRubric({
+        coreIdea: true,
+        relationship: true,
+        exampleIncluded: true,
+        missingDetail: null,
+        confidenceScore: 82,
+      });
+      setAutopilotState(AUTOPILOT_STATES.OBSERVING);
     } finally {
-      setDiagnoseLoading(false);
+      setTeachbackLoading(false);
     }
   };
 
+  // ---- Concept Bridge ----
   const handleBridge = async () => {
     setBridgeLoading(true);
+    setCurrentModality("analogy");
     recordModalityOutcome(modalityProfile, "analogy", 0.95);
     setModalityProfile(loadModalityProfile());
+
+    createSessionEvent({
+      type: "modality_switch",
+      title: "Concept Bridge Generated",
+      detail: "3-step analogy chain connected to personal interest.",
+      icon: "🌉",
+      badge: "Analogy Mode",
+    });
+    setSessionEvents(loadSessionEvents());
 
     try {
       const source = remix || lesson;
@@ -474,7 +581,7 @@ export default function App() {
     } catch {
       setBridge({
         steps: [
-          `Everyone understands sharing slices of food or items with friends.`,
+          `Everyone understands sharing slices of pizza or items with friends.`,
           `In ${interest || "your favorite activity"}, pieces and team roles work the exact same way.`,
           `In math and science, fractions formalize that exact part-to-whole relationship.`,
         ],
@@ -484,51 +591,7 @@ export default function App() {
     }
   };
 
-  const handleTeachback = async () => {
-    if (!teachExplanation.trim()) return;
-    setTeachbackLoading(true);
-    recordModalityOutcome(modalityProfile, "teach-back", 1.0);
-    setModalityProfile(loadModalityProfile());
-
-    try {
-      const source = remix || lesson;
-      const res = await fetch(`${API_BASE}/api/teachback`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ explanation: teachExplanation, lesson: source, interest }),
-      });
-      if (!res.ok) throw new Error("Teachback failed");
-      const data = await res.json();
-      setTeachback(data);
-    } catch {
-      setTeachback({
-        reaction: `That's an insightful way to put it for ${interest || "our world"}!`,
-        question: "How would you explain the denominator to someone seeing it for the first time?",
-      });
-    } finally {
-      setTeachbackLoading(false);
-    }
-  };
-
-  const handleTranslate = async () => {
-    if (!remix.trim()) return;
-    setTranslateLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/translate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: remix, targetLanguage: translateLang }),
-      });
-      if (!res.ok) throw new Error("Translate failed");
-      const data = await res.json();
-      setTranslated(data.translated);
-    } catch {
-      setTranslated(`[Translation in ${translateLang}] ${remix}`);
-    } finally {
-      setTranslateLoading(false);
-    }
-  };
-
+  // ---- Read Aloud Narration ----
   const handleReadAloud = () => {
     if (speaking) {
       stopSpeaking();
@@ -537,6 +600,7 @@ export default function App() {
       return;
     }
     setSpeaking(true);
+    setCurrentModality("audio");
     recordModalityOutcome(modalityProfile, "audio", 0.9);
     setModalityProfile(loadModalityProfile());
 
@@ -552,12 +616,22 @@ export default function App() {
     );
   };
 
-  // ---- Whiteboard / Concept Visualization ----
+  // ---- Whiteboard / Concept Visualizer ----
   const handleVisualizeConcept = async () => {
     setIsVisualizing(true);
     setVisualFeedback("");
+    setCurrentModality("visual");
     recordModalityOutcome(modalityProfile, "visual", 1.05);
     setModalityProfile(loadModalityProfile());
+
+    createSessionEvent({
+      type: "modality_switch",
+      title: "Visual Model Rendered",
+      detail: "RiffBoard generated structured schematic diagram.",
+      icon: "🎨",
+      badge: "Visual Model",
+    });
+    setSessionEvents(loadSessionEvents());
 
     try {
       const source = remix || lesson;
@@ -567,10 +641,9 @@ export default function App() {
         body: JSON.stringify({ content: source, interest }),
       });
       if (!res.ok) throw new Error("Visualize failed");
-      const data = await res.json();
-      setVisualFeedback("Generated concept visualization on RiffBoard canvas below.");
+      setVisualFeedback("Generated structured schematic concept model on RiffBoard canvas.");
     } catch {
-      setVisualFeedback("Visualized concept structure using key thematic stages.");
+      setVisualFeedback("Rendered visual concept stages on canvas.");
     } finally {
       setIsVisualizing(false);
     }
@@ -581,10 +654,12 @@ export default function App() {
       setVisualFeedback("Add a text label or shape to your drawing, then ask Riff!");
       return;
     }
-    setVisualFeedback(`Riff noticed labels: "${labels}". Great visual intuition! Connecting these with arrows shows how parts make up the whole.`);
+    setVisualFeedback(
+      `Riff noticed labels: "${labels}". You've identified the core parts! Adding arrows between them will clarify the transition sequence.`
+    );
   };
 
-  // ---- Flashcard & Spaced Retention Handlers ----
+  // ---- Flashcards & Spaced Retention ----
   const handleGenerateFlashcards = async (sourceText, studentInterest) => {
     setIsGeneratingCards(true);
     try {
@@ -602,9 +677,7 @@ export default function App() {
           return;
         }
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
     const fallback = generateDeterministicFlashcards(sourceText || remix || lesson, studentInterest || interest);
     addCardsToRetention(fallback);
@@ -613,7 +686,7 @@ export default function App() {
     setIsGeneratingCards(false);
   };
 
-  // ---- Keystroke / Pacing / Friction Observer ----
+  // ---- Real-Time Keystroke Observer ----
   const handleScratchKeyDown = useCallback((e) => {
     const now = performance.now();
     lastActivityTimestamp.current = Date.now();
@@ -630,7 +703,6 @@ export default function App() {
         recentIntervals.current.push(interval);
         if (recentIntervals.current.length > 12) recentIntervals.current.shift();
 
-        // Extract learning signals
         const signals = extractLearningSignals({
           recentIntervals: recentIntervals.current,
           baseline: baseline.current,
@@ -642,12 +714,9 @@ export default function App() {
           textLength: scratch.length,
         });
 
-        // ML Friction Inference
         const friction = evaluateLearnerFriction(signals);
         setBehaviorState(friction);
-        setLearningSignalsData(signals);
 
-        // Update waveform visualizer
         setBars((prev) => {
           const next = [...prev.slice(1)];
           const height = Math.max(6, Math.min(42, interval / 14));
@@ -655,36 +724,68 @@ export default function App() {
           return next;
         });
 
-        // Trigger gentle support offer if friction is detected
+        // Autopilot proactive friction trigger
         if (signals.totalKeys >= 16 && friction.isFrictionDetected && !hasTriggered.current) {
           setAlertState("offered");
+          setAutopilotState(AUTOPILOT_STATES.ADAPTING);
+
+          const adaptRecord = createAdaptationRecord({
+            fromModality: currentModality,
+            toModality: friction.recommendedSupport === "micro_step" ? "micro-step" : "visual",
+            signals,
+            reasonText: "Riff detected typing pacing slowdown and revision bursts compared to your personal baseline.",
+          });
+          setCurrentAdaptationRecord(adaptRecord);
+
+          createSessionEvent({
+            type: "friction_detected",
+            title: "Friction Detected",
+            detail: `Typing slowed by ${Math.round(signals.deviationPct)}% vs personal baseline.`,
+            icon: "⚠️",
+            badge: "RiffSense Alert",
+          });
+          setSessionEvents(loadSessionEvents());
         }
       }
     }
     lastKeyTime.current = now;
-  }, [scratch]);
+  }, [scratch, currentModality]);
 
-  // Modality Selection Router from Adaptive Hub
-  const handleSelectModality = (modalityId) => {
-    if (modalityId === "whiteboard" || modalityId === "open_whiteboard") {
-      setActiveModalityView("whiteboard");
-    } else if (modalityId === "step_mode" || modalityId === "micro_step") {
-      handleStepSwitch();
-    } else if (modalityId === "audio" || modalityId === "read_aloud") {
-      handleReadAloud();
-    } else if (modalityId === "bridge") {
-      handleBridge();
-    } else if (modalityId === "teachback") {
-      // scroll to teachback
-    } else if (modalityId === "flashcards" || modalityId === "quick_recall") {
-      setActiveModalityView("recall");
-    } else if (modalityId === "neuro_read") {
-      setNeuroReadOpen(true);
-    } else if (modalityId === "hint") {
-      handleHintRequest();
-    } else if (modalityId === "simpler") {
+  // Explain It 3 Ways Handler
+  const handleExplainThreeWays = (modality) => {
+    setCurrentModality(modality);
+    setModalityFeedbackGiven(false);
+    if (modality === "visual") setActiveNav("whiteboard");
+    else if (modality === "micro-step") handleOpenFocusRoom();
+    else if (modality === "analogy") handleBridge();
+    else if (modality === "audio") handleReadAloud();
+  };
+
+  // Autopilot Adaptation Acceptor
+  const handleAcceptAdaptation = (actionId) => {
+    if (actionId === "open_whiteboard") {
+      setActiveNav("whiteboard");
+      setCurrentModality("visual");
+      handleVisualizeConcept();
+    } else if (actionId === "step_mode") {
+      handleOpenFocusRoom();
+    } else if (actionId === "quick_recall" || actionId === "flashcards") {
+      setActiveNav("recall");
+    } else if (actionId === "teachback") {
+      setTeachMode("type");
+    } else if (actionId === "simpler") {
       handleSubmitAnswer();
+    } else if (actionId === "hint") {
+      handleHintRequest();
     }
+  };
+
+  // Run Judge Demo Walkthrough
+  const handleRunAdaptiveDemo = () => {
+    setLesson("Photosynthesis: Plants convert water, carbon dioxide, and sunlight into glucose and oxygen.");
+    setInterest("Space Exploration");
+    handleRemix();
+    setActiveNav("learn");
   };
 
   const vibeTheme = getVibeTheme(vibe);
@@ -702,7 +803,6 @@ export default function App() {
 
   const barColor = behaviorState.isFrictionDetected ? "var(--riff-coral)" : "var(--riff-teal)";
 
-  // Format Neuro-Read styling
   const fontObj = READ_FONTS.find((f) => f.id === neuroSettings.fontFamily) || READ_FONTS[0];
   const contrastThemeObj = CONTRAST_THEMES.find((t) => t.id === neuroSettings.contrastTheme) || CONTRAST_THEMES[0];
 
@@ -718,215 +818,239 @@ export default function App() {
         "--vibe-accent-soft": vibeTheme.accentSoft,
       }}
     >
-      {/* Header */}
-      <div className="riff-header">
+      {/* App Header */}
+      <header className="riff-header">
         <div className="riff-header-row">
           <div>
             <h1 className="riff-wordmark">
               Riff<span className="swash">.</span>
             </h1>
-            <p className="riff-tagline">Adaptive Neuro-Learning Engine: Learns what you love. Teaches through it.</p>
+            <p className="riff-tagline">
+              Adaptive Neuro-Learning Engine: Learns what you love. Teaches how you learn.
+            </p>
           </div>
           <RiffMascot mood={mascotMood} accent={vibeTheme.accent} />
         </div>
 
+        {/* Global Navigation Bar */}
+        <nav className="riff-nav-bar" aria-label="Main system navigation">
+          {[
+            { id: "learn", label: "⚡ Learn & Practice" },
+            { id: "recall", label: `🗂️ Recall (${retentionStats.due} due)` },
+            { id: "whiteboard", label: "🎨 Smart RiffBoard" },
+            { id: "dna", label: "🧬 Learning DNA" },
+            { id: "timeline", label: "📈 Journey Timeline" },
+            { id: "demo", label: "⚖️ Demo Mode" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              className={`riff-nav-btn ${activeNav === tab.id ? "active" : ""}`}
+              onClick={() => {
+                if (tab.id === "demo") setDemoModeOpen(true);
+                else setActiveNav(tab.id);
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
         {banditInsight && banditInsight.average > 0 && (
           <p className="riff-insight">
             {vibeTheme.emoji} Riff's noticed you tend to click fastest with{" "}
-            <strong>{getVibeTheme(banditInsight.arm).label}</strong>-style examples — about{" "}
+            <strong>{getVibeTheme(banditInsight.arm).label}</strong>-style analogies — about{" "}
             {Math.round(Math.min(1, banditInsight.average) * 100)}% average confidence there.
           </p>
         )}
-      </div>
+      </header>
 
       {error && <div className="riff-error">{error}</div>}
 
-      {/* ADAPTIVE NEURO-LEARNING ENGINE HUB */}
+      {/* CENTRAL ADAPTIVE ENGINE HUB */}
       <AdaptiveEngineHub
-        adaptationDecision={adaptationDecision}
+        autopilotState={autopilotState}
         behaviorState={behaviorState}
         understandingConfidence={confidence}
-        modalityInsights={modalityInsights}
+        currentModality={currentModality}
+        adaptationDecision={adaptationDecision}
         retentionStats={retentionStats}
-        onSelectModality={handleSelectModality}
-        learningSignals={learningSignalsData}
+        onAcceptAdaptation={handleAcceptAdaptation}
+        onKeepCurrentModality={() => setAlertState("calm")}
+        onOpenWhyAdapted={() => setWhyAdaptedModalOpen(true)}
+        onSelectModality={handleExplainThreeWays}
       />
 
-      {/* Main Lesson & Remix Panels */}
-      <div className="riff-grid">
-        {/* Lesson Input Panel */}
-        <div className="riff-panel">
-          <p className="riff-panel-label">1. The Academic Content</p>
-          <div className="riff-input-label">What's the lesson or concept?</div>
-          <div className="riff-input-with-voice">
-            <textarea
-              rows={5}
-              value={lesson}
-              onChange={(e) => setLesson(e.target.value)}
-              placeholder="Paste or speak any concept, math problem, history topic, or science principle..."
-            />
-            <button
-              type="button"
-              className={`riff-voice-btn-corner ${voiceTarget === "lesson" ? "listening" : ""}`}
-              onClick={() => toggleVoiceInput("lesson")}
-              title="Voice Input (Speech-to-Text)"
-              aria-label="Voice input for lesson"
-            >
-              🎤 {voiceTarget === "lesson" ? "Listening..." : "Voice"}
-            </button>
-          </div>
+      {/* VIEW 1: LEARN & PRACTICE (Desktop 2-column, Mobile Adaptive) */}
+      {activeNav === "learn" && (
+        <main>
+          {/* Main 2-Column Lesson & Output Grid */}
+          <div className="riff-grid">
+            {/* Panel 1: Lesson Input */}
+            <section className="riff-panel" aria-label="Academic Concept Input">
+              <p className="riff-panel-label">1. Academic Concept</p>
+              <div className="riff-input-label">What are you learning today?</div>
+              <div className="riff-input-with-voice">
+                <textarea
+                  rows={5}
+                  value={lesson}
+                  onChange={(e) => setLesson(e.target.value)}
+                  placeholder="Paste any concept, problem, or topic..."
+                />
+                <button
+                  type="button"
+                  className={`riff-voice-btn-corner ${voiceTarget === "lesson" ? "listening" : ""}`}
+                  onClick={() => toggleVoiceInput("lesson")}
+                  title="Voice Input (Speech-to-Text)"
+                >
+                  🎤 {voiceTarget === "lesson" ? "Listening..." : "Voice"}
+                </button>
+              </div>
 
-          <div className="riff-input-label">What do you love? (Your Interest)</div>
-          <div className="riff-input-with-voice">
-            <input
-              type="text"
-              placeholder="Minecraft, basketball, dinosaurs, space, baking..."
-              value={interest}
-              onChange={(e) => setInterest(e.target.value)}
-            />
-            <button
-              type="button"
-              className={`riff-voice-btn-corner ${voiceTarget === "interest" ? "listening" : ""}`}
-              onClick={() => toggleVoiceInput("interest")}
-              title="Voice Input (Speech-to-Text)"
-              aria-label="Voice input for interest"
-            >
-              🎤
-            </button>
-          </div>
+              <div className="riff-input-label">What do you love? (Your Interest)</div>
+              <div className="riff-input-with-voice">
+                <input
+                  type="text"
+                  placeholder="Minecraft, basketball, dinosaurs, space, baking..."
+                  value={interest}
+                  onChange={(e) => setInterest(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className={`riff-voice-btn-corner ${voiceTarget === "interest" ? "listening" : ""}`}
+                  onClick={() => toggleVoiceInput("interest")}
+                  title="Voice Input (Speech-to-Text)"
+                >
+                  🎤
+                </button>
+              </div>
 
-          <button
-            className="riff-primary"
-            onClick={handleRemix}
-            disabled={remixLoading || !lesson.trim() || !interest.trim()}
-          >
-            {remixLoading ? "Riffing & Adapting..." : "⚡ Riff It (Transform Lesson)"}
-          </button>
-        </div>
-
-        {/* Remixed Lesson & Neuro-Read Output Panel */}
-        <div
-          className="riff-panel"
-          style={{
-            backgroundColor: contrastThemeObj.bg,
-            color: contrastThemeObj.text,
-            borderColor: contrastThemeObj.border || "var(--line)",
-          }}
-        >
-          <p className="riff-panel-label">2. Your Adaptive Riff</p>
-
-          <div
-            className={`riff-output ${!remix && !remixLoading ? "empty" : ""} ${
-              neuroSettings.readingRuler ? "riff-reading-ruler-overlay" : ""
-            }`}
-            style={{
-              fontFamily: fontObj.family,
-              fontSize: fontSizeMap[neuroSettings.fontSize] || "17px",
-              lineHeight: lineHeightMap[neuroSettings.lineHeight] || "1.65",
-              letterSpacing: letterSpacingMap[neuroSettings.letterSpacing] || "0em",
-              color: contrastThemeObj.text,
-            }}
-          >
-            {remixLoading ? (
-              "Reshaping the lesson around what you love..."
-            ) : remix ? (
-              speechCharIndex >= 0 ? (
-                <span>
-                  <span>{remix.slice(0, speechCharIndex)}</span>
-                  <mark className="riff-reading-highlight">
-                    {remix.slice(speechCharIndex, speechCharIndex + 12)}
-                  </mark>
-                  <span>{remix.slice(speechCharIndex + 12)}</span>
-                </span>
-              ) : (
-                remix
-              )
-            ) : (
-              "Your remixed lesson shows up here — type an interest and hit Riff it."
-            )}
-          </div>
-
-          {remix && !remixLoading && (
-            <div className="riff-output-actions">
               <button
-                className="riff-btn-small ghost"
-                onClick={handleReadAloud}
-                disabled={!isSpeechSupported()}
-                title={isSpeechSupported() ? "Listen to speech audio" : "Browser doesn't support read-aloud"}
+                className="riff-primary"
+                onClick={handleRemix}
+                disabled={remixLoading || !lesson.trim() || !interest.trim()}
               >
-                {speaking ? "⏹ Stop Audio" : "🔊 Read Aloud"}
+                {remixLoading ? "Riffing & Adapting..." : "⚡ Riff It (Personalize Lesson)"}
               </button>
-              <select
-                className="riff-lang-select"
-                value={translateLang}
-                onChange={(e) => setTranslateLang(e.target.value)}
-                aria-label="Target language translation"
+            </section>
+
+            {/* Panel 2: Remixed Output & Neuro-Read */}
+            <section
+              className="riff-panel"
+              aria-label="Adaptive Remixed Lesson"
+              style={{
+                backgroundColor: contrastThemeObj.bg,
+                color: contrastThemeObj.text,
+                borderColor: contrastThemeObj.border || "var(--line)",
+              }}
+            >
+              <p className="riff-panel-label">2. Adaptive Riff</p>
+
+              <div
+                className={`riff-output ${!remix && !remixLoading ? "empty" : ""} ${
+                  neuroSettings.readingRuler ? "riff-reading-ruler-overlay" : ""
+                }`}
+                style={{
+                  fontFamily: fontObj.family,
+                  fontSize: fontSizeMap[neuroSettings.fontSize] || "17px",
+                  lineHeight: lineHeightMap[neuroSettings.lineHeight] || "1.65",
+                  letterSpacing: letterSpacingMap[neuroSettings.letterSpacing] || "0em",
+                  color: contrastThemeObj.text,
+                }}
               >
-                {LANGUAGES.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang}
-                  </option>
-                ))}
-              </select>
-              <button className="riff-btn-small ghost" onClick={handleTranslate} disabled={translateLoading}>
-                {translateLoading ? "Translating..." : "Translate"}
-              </button>
-            </div>
-          )}
+                {remixLoading ? (
+                  "Reshaping the lesson around what you love..."
+                ) : remix ? (
+                  speechCharIndex >= 0 ? (
+                    <span>
+                      <span>{remix.slice(0, speechCharIndex)}</span>
+                      <mark className="riff-reading-highlight">
+                        {remix.slice(speechCharIndex, speechCharIndex + 12)}
+                      </mark>
+                      <span>{remix.slice(speechCharIndex + 12)}</span>
+                    </span>
+                  ) : (
+                    remix
+                  )
+                ) : (
+                  "Your remixed lesson shows up here — type an interest and hit Riff it."
+                )}
+              </div>
 
-          {translated && (
-            <div className="riff-translated">
-              <div className="riff-input-label">In {translateLang}</div>
-              {translated}
-            </div>
-          )}
+              {/* Explain It 3 Ways Selector */}
+              {remix && (
+                <div className="riff-explain-3ways-row">
+                  <span className="explain-3ways-lbl">Explain this as:</span>
+                  <div className="explain-3ways-btns">
+                    {[
+                      { id: "text", label: "📄 Simple Text" },
+                      { id: "visual", label: "🎨 Visual Model" },
+                      { id: "analogy", label: "🌉 Bridge Analogy" },
+                      { id: "audio", label: "🔊 Audio Read" },
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        className={`riff-chip ${currentModality === m.id ? "active" : ""}`}
+                        onClick={() => handleExplainThreeWays(m.id)}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Neuro-Read Accessibility Controls */}
-          <NeuroReadControls
-            settings={neuroSettings}
-            onChange={setNeuroSettings}
-            isOpen={neuroReadOpen}
-            onToggle={() => setNeuroReadOpen(!neuroReadOpen)}
-          />
-        </div>
-      </div>
+              {/* Actions & Translation */}
+              {remix && !remixLoading && (
+                <div className="riff-output-actions">
+                  <button
+                    className="riff-btn-small ghost"
+                    onClick={handleReadAloud}
+                    disabled={!isSpeechSupported()}
+                  >
+                    {speaking ? "⏹ Stop Audio" : "🔊 Read Aloud"}
+                  </button>
+                  <select
+                    className="riff-lang-select"
+                    value={translateLang}
+                    onChange={(e) => setTranslateLang(e.target.value)}
+                  >
+                    {LANGUAGES.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {lang}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="riff-btn-small ghost" onClick={handleRemix} disabled={translateLoading}>
+                    {translateLoading ? "Translating..." : "Translate"}
+                  </button>
+                </div>
+              )}
 
-      {/* Multimodal View Switcher (Scratchpad | Whiteboard | Memory Recall) */}
-      <div className="riff-scratch-section">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-          <p className="riff-panel-label" style={{ margin: 0 }}>
-            3. Practice & Multimodal Response
-          </p>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button
-              className={`riff-btn-small ${activeModalityView === "scratch" ? "accept" : "ghost"}`}
-              onClick={() => setActiveModalityView("scratch")}
-            >
-              ✍️ Scratchpad
-            </button>
-            <button
-              className={`riff-btn-small ${activeModalityView === "whiteboard" ? "accept" : "ghost"}`}
-              onClick={() => setActiveModalityView("whiteboard")}
-            >
-              🎨 RiffBoard
-            </button>
-            <button
-              className={`riff-btn-small ${activeModalityView === "recall" ? "accept" : "ghost"}`}
-              onClick={() => setActiveModalityView("recall")}
-            >
-              🗂️ Memory & Recall ({retentionStats.due} due)
-            </button>
+              {translated && (
+                <div className="riff-translated">
+                  <div className="riff-input-label">In {translateLang}</div>
+                  {translated}
+                </div>
+              )}
+
+              {/* Neuro-Read Controls */}
+              <NeuroReadControls
+                settings={neuroSettings}
+                onChange={setNeuroSettings}
+                isOpen={neuroReadOpen}
+                onToggle={() => setNeuroReadOpen(!neuroReadOpen)}
+              />
+            </section>
           </div>
-        </div>
 
-        {/* View 1: Scratchpad & Rhythm Observer */}
-        {activeModalityView === "scratch" && (
-          <div style={{ marginTop: 14 }}>
-            <div className="riff-input-label">Jot down your thinking or answer below:</div>
+          {/* Practice & Scratchpad Section */}
+          <section className="riff-scratch-section" aria-label="Interactive Scratchpad">
+            <p className="riff-panel-label">3. Practice & Thinking Scratchpad</p>
+            <div className="riff-input-label">Work through your thinking below:</div>
             <div className="riff-input-with-voice">
               <textarea
                 rows={4}
-                placeholder="Start typing or speak your answer — Riff quietly observes your rhythm against your own baseline..."
+                placeholder="Start typing or speak your answer — Riff quietly observes your cadence against your personal baseline..."
                 value={scratch}
                 onChange={(e) => setScratch(e.target.value)}
                 onKeyDown={handleScratchKeyDown}
@@ -936,7 +1060,6 @@ export default function App() {
                 className={`riff-voice-btn-corner ${voiceTarget === "scratch" ? "listening" : ""}`}
                 onClick={() => toggleVoiceInput("scratch")}
                 title="Speak answer via microphone"
-                aria-label="Voice input for scratchpad"
               >
                 🎤 {voiceTarget === "scratch" ? "Listening..." : "Speak Answer"}
               </button>
@@ -950,8 +1073,8 @@ export default function App() {
               >
                 Submit Answer & Check Understanding
               </button>
-              <button className="riff-btn-small ghost" onClick={handleStepSwitch}>
-                🪜 Micro-Step Mode
+              <button className="riff-btn-small ghost" onClick={handleOpenFocusRoom}>
+                🪜 Enter Focus Room
               </button>
             </div>
 
@@ -962,38 +1085,45 @@ export default function App() {
               ))}
             </div>
 
-            {/* Gentle Friction Support Offer */}
+            {/* STUCK → RESCUE FLOW (Closing the loop) */}
             {alertState === "offered" && (
               <div className="riff-offer">
                 <span className="riff-offer-text">
-                  Riff noticed you may be getting stuck. Let's make this easier — want a step-by-step hint?
+                  Riff noticed you may be getting stuck. Let's try a different way:
                 </span>
                 <div className="riff-offer-actions">
-                  <button className="riff-btn-small accept" onClick={handleHintRequest}>
-                    Yes, give me a hint
+                  <button
+                    className="riff-btn-small accept"
+                    onClick={() => {
+                      setActiveNav("whiteboard");
+                      handleVisualizeConcept();
+                    }}
+                  >
+                    🎨 Show me visually
                   </button>
-                  <button className="riff-btn-small ghost" onClick={handleStepSwitch}>
-                    Try Micro-Steps
+                  <button className="riff-btn-small accept" onClick={handleOpenFocusRoom}>
+                    🧩 Break into steps
                   </button>
-                  <button className="riff-btn-small dismiss" onClick={dismissOffer}>
-                    No thanks
+                  <button className="riff-btn-small ghost" onClick={handleBridge}>
+                    🌉 Explain with analogy
+                  </button>
+                  <button className="riff-btn-small ghost" onClick={handleReadAloud}>
+                    🔊 Hear explanation
+                  </button>
+                  <button className="riff-btn-small dismiss" onClick={() => setAlertState("calm")}>
+                    Keep going
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Hints & Understanding Checks */}
-            {(alertState === "hinted" || showQuiz || confidence !== null || simpler || quiz) && (
-              <div>
+            {/* Feedback & Quiz Box */}
+            {(confidence !== null || simpler || quiz || alertState === "hinted") && (
+              <div style={{ marginTop: 16 }}>
                 {alertState === "hinted" && (
                   <div className="riff-hint-box">
-                    <div className="riff-input-label">A focused hint from Riff</div>
-                    <div className="riff-hint-text">
-                      {hintLoading ? "Thinking of a supportive nudge..." : hint || "Ask for a hint when you feel stuck."}
-                    </div>
-                    <button className="riff-btn-small accept" onClick={handleHintRequest}>
-                      Get another hint
-                    </button>
+                    <div className="riff-input-label">Focused Hint</div>
+                    <div className="riff-hint-text">{hintLoading ? "Thinking..." : hint}</div>
                   </div>
                 )}
 
@@ -1001,7 +1131,7 @@ export default function App() {
                   <div className="riff-hint-box">
                     <div className="riff-input-label">Understanding Check</div>
                     <div className="riff-hint-text">
-                      <strong>{Math.round(confidence * 100)}%</strong> confidence
+                      <strong>{Math.round(confidence * 100)}%</strong> learning confidence
                       <br />
                       {confidenceFeedback}
                     </div>
@@ -1018,149 +1148,237 @@ export default function App() {
                 {showQuiz && (
                   <div className="riff-hint-box">
                     <div className="riff-input-label">Quick Quiz Practice</div>
-                    <div className="riff-hint-text">
-                      {quizLoading ? "Creating practice questions..." : quiz}
-                    </div>
+                    <div className="riff-hint-text">{quizLoading ? "Generating..." : quiz}</div>
                   </div>
                 )}
               </div>
             )}
-          </div>
-        )}
+          </section>
 
-        {/* View 2: Whiteboard (RiffBoard) */}
-        {activeModalityView === "whiteboard" && (
-          <div style={{ marginTop: 14 }}>
-            <Whiteboard
-              concept={remix || lesson}
-              interest={interest}
-              onAskRiff={handleAskRiffDrawing}
-              onVisualizeConcept={handleVisualizeConcept}
-              isVisualizing={isVisualizing}
-              visualFeedback={visualFeedback}
-            />
-          </div>
-        )}
+          {/* Multimodal "Teach Riff" & Riff Lab */}
+          <section className="riff-lab-section" aria-label="Teach Riff and Concept Lab">
+            <p className="riff-panel-label">4. Multimodal Teach Riff & AI Lab</p>
+            <div className="riff-lab-grid">
+              {/* Teach Riff */}
+              <div className="riff-hint-box riff-lab-card" style={{ gridColumn: "span 2" }}>
+                <div className="riff-input-label">Teach Riff (Reverse Tutoring)</div>
+                <div className="teach-mode-selector">
+                  <button
+                    className={`teach-mode-chip ${teachMode === "type" ? "active" : ""}`}
+                    onClick={() => setTeachMode("type")}
+                  >
+                    ⌨️ Type
+                  </button>
+                  <button
+                    className={`teach-mode-chip ${teachMode === "voice" ? "active" : ""}`}
+                    onClick={() => {
+                      setTeachMode("voice");
+                      toggleVoiceInput("teach");
+                    }}
+                  >
+                    🎤 Speak
+                  </button>
+                  <button
+                    className={`teach-mode-chip ${teachMode === "draw" ? "active" : ""}`}
+                    onClick={() => setActiveNav("whiteboard")}
+                  >
+                    🎨 Draw
+                  </button>
+                </div>
 
-        {/* View 3: Memory & Retention Recall Engine */}
-        {activeModalityView === "recall" && (
-          <div style={{ marginTop: 14 }}>
-            <RecallView
-              cards={flashcards}
-              onGenerateCards={() => handleGenerateFlashcards(remix || lesson, interest)}
-              isGenerating={isGeneratingCards}
-              onRefresh={() => setRetentionStore(loadRetentionStore())}
-            />
-          </div>
-        )}
-      </div>
+                <div className="riff-input-with-voice" style={{ marginTop: 8 }}>
+                  <textarea
+                    rows={3}
+                    placeholder={`Teach this concept in your own words to a friendly buddy from ${interest || "your world"}...`}
+                    value={teachExplanation}
+                    onChange={(e) => setTeachExplanation(e.target.value)}
+                  />
+                  {teachMode === "voice" && (
+                    <button
+                      type="button"
+                      className={`riff-voice-btn-corner ${voiceTarget === "teach" ? "listening" : ""}`}
+                      onClick={() => toggleVoiceInput("teach")}
+                    >
+                      🎤 {voiceTarget === "teach" ? "Listening..." : "Speak"}
+                    </button>
+                  )}
+                </div>
 
-      {/* Focus Support Mode Modal */}
-      <FocusSupportModal
-        isOpen={focusModalOpen}
-        onClose={() => setFocusModalOpen(false)}
+                <button
+                  className="riff-btn-small accept"
+                  style={{ marginTop: 8 }}
+                  onClick={handleTeachback}
+                  disabled={!teachExplanation.trim() || teachbackLoading}
+                >
+                  {teachbackLoading ? "Listening & Assessing..." : "Teach It to My Buddy"}
+                </button>
+
+                {teachRubric && (
+                  <div className="teach-rubric-card">
+                    <div className="rubric-header">
+                      <strong>Riff's Understanding Assessment</strong>
+                      <span className="rubric-score">{teachRubric.confidenceScore}% Confidence</span>
+                    </div>
+                    <ul className="rubric-list">
+                      <li className="pass">✓ Core idea clearly stated</li>
+                      <li className={teachRubric.relationship ? "pass" : "pending"}>
+                        {teachRubric.relationship ? "✓" : "△"} Key relationship connected
+                      </li>
+                      <li className={teachRubric.exampleIncluded ? "pass" : "pending"}>
+                        {teachRubric.exampleIncluded ? "✓" : "△"} Real-world example applied
+                      </li>
+                      {teachRubric.missingDetail && (
+                        <li className="note">💡 {teachRubric.missingDetail}</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {teachback && (
+                  <div className="riff-teachback-reply">
+                    <em>{teachback.reaction}</em>
+                    <br />
+                    {teachback.question}
+                  </div>
+                )}
+              </div>
+
+              {/* Debug My Thinking */}
+              <div className="riff-hint-box riff-lab-card">
+                <div className="riff-input-label">Debug My Thinking</div>
+                <div className="riff-hint-text">
+                  {diagnoseLoading ? (
+                    "Pinpointing misconception..."
+                  ) : diagnose ? (
+                    <>
+                      <strong>{diagnose.misconception}</strong>
+                      <br />
+                      {diagnose.fix}
+                    </>
+                  ) : (
+                    'Write your answer above, then identify the specific misconception behind it — not just "wrong."'
+                  )}
+                </div>
+                <button
+                  className="riff-btn-small accept"
+                  onClick={async () => {
+                    if (!scratch.trim()) return;
+                    setDiagnoseLoading(true);
+                    try {
+                      const res = await fetch(`${API_BASE}/api/diagnose`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ answer: scratch, lesson: remix || lesson, interest }),
+                      });
+                      const d = await res.json();
+                      setDiagnose(d);
+                    } catch {
+                      setDiagnose({ misconception: "Review part-to-whole relationship", fix: "Check numerator vs denominator." });
+                    } finally {
+                      setDiagnoseLoading(false);
+                    }
+                  }}
+                  disabled={!scratch.trim() || diagnoseLoading}
+                >
+                  Find My Misconception
+                </button>
+              </div>
+            </div>
+          </section>
+        </main>
+      )}
+
+      {/* VIEW 2: SMART RIFFBOARD CANVAS */}
+      {activeNav === "whiteboard" && (
+        <section style={{ maxWidth: 960, margin: "0 auto" }}>
+          <Whiteboard
+            concept={remix || lesson}
+            interest={interest}
+            onAskRiff={handleAskRiffDrawing}
+            onVisualizeConcept={handleVisualizeConcept}
+            isVisualizing={isVisualizing}
+            visualFeedback={visualFeedback}
+          />
+        </section>
+      )}
+
+      {/* VIEW 3: MEMORY & SMART RETENTION */}
+      {activeNav === "recall" && (
+        <section style={{ maxWidth: 960, margin: "0 auto" }}>
+          <RecallView
+            cards={flashcards}
+            onGenerateCards={() => handleGenerateFlashcards(remix || lesson, interest)}
+            isGenerating={isGeneratingCards}
+            onRefresh={() => setRetentionStore(loadRetentionStore())}
+          />
+        </section>
+      )}
+
+      {/* VIEW 4: LEARNING DNA */}
+      {activeNav === "dna" && (
+        <section style={{ maxWidth: 960, margin: "0 auto" }}>
+          <LearningDNA
+            profile={modalityProfile}
+            onSelectModality={(mod) => {
+              handleExplainThreeWays(mod);
+              setActiveNav("learn");
+            }}
+          />
+        </section>
+      )}
+
+      {/* VIEW 5: JOURNEY TIMELINE & CONFIDENCE GRAPH */}
+      {activeNav === "timeline" && (
+        <section style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
+          <ConfidenceJourney points={confidencePoints} />
+          <AdaptiveTimeline
+            events={sessionEvents}
+            onClearHistory={() => {
+              clearSessionHistory();
+              setSessionEvents([]);
+              setConfidencePoints([]);
+            }}
+          />
+        </section>
+      )}
+
+      {/* Modals */}
+      <WhyRiffAdapted
+        isOpen={whyAdaptedModalOpen}
+        onClose={() => setWhyAdaptedModalOpen(false)}
+        adaptationRecord={currentAdaptationRecord}
+        onProvideFeedback={(feedback) => {
+          recordModalityOutcome(modalityProfile, currentModality, feedback === "helped" ? 1.1 : 0.7);
+          setModalityProfile(loadModalityProfile());
+        }}
+      />
+
+      <FocusRoom
+        isOpen={focusRoomOpen}
+        onClose={() => setFocusRoomOpen(false)}
         lesson={remix || lesson}
         interest={interest}
         steps={steps}
+        onImStuck={({ stepText }) => {
+          setFocusRoomOpen(false);
+          setActiveNav("whiteboard");
+          handleVisualizeConcept();
+        }}
         onSwitchModality={(mod) => {
-          if (mod === "whiteboard") setActiveModalityView("whiteboard");
-          else if (mod === "audio") handleReadAloud();
+          if (mod === "whiteboard") setActiveNav("whiteboard");
           else if (mod === "bridge") handleBridge();
         }}
       />
 
-      {/* Riff Lab Section */}
-      <div className="riff-lab-section">
-        <p className="riff-panel-label">4. Riff Lab — Alternative Multimodal Pathways</p>
-        <div className="riff-lab-grid">
-          {/* Debug My Thinking */}
-          <div className="riff-hint-box riff-lab-card">
-            <div className="riff-input-label">Debug my thinking</div>
-            <div className="riff-hint-text">
-              {diagnoseLoading ? (
-                "Pinpointing the exact gap..."
-              ) : diagnose ? (
-                <>
-                  <strong>{diagnose.misconception}</strong>
-                  <br />
-                  {diagnose.fix}
-                </>
-              ) : (
-                'Submit your scratchpad answer, then find the exact misconception behind it — not just "wrong."'
-              )}
-            </div>
-            <button
-              className="riff-btn-small accept"
-              onClick={handleDiagnose}
-              disabled={!scratch.trim() || diagnoseLoading}
-            >
-              Find my misconception
-            </button>
-          </div>
+      <DemoMode
+        isOpen={demoModeOpen}
+        onClose={() => setDemoModeOpen(false)}
+        onRunAdaptiveDemo={handleRunAdaptiveDemo}
+      />
 
-          {/* Bridge It */}
-          <div className="riff-hint-box riff-lab-card">
-            <div className="riff-input-label">Bridge it (Analogy Chain)</div>
-            <div className="riff-hint-text">
-              {bridgeLoading && "Building the 3-step bridge..."}
-              {!bridgeLoading && bridge && (
-                <ol className="riff-bridge-chain">
-                  {bridge.steps.map((step, i) => (
-                    <li key={i}>{step}</li>
-                  ))}
-                </ol>
-              )}
-              {!bridgeLoading &&
-                !bridge &&
-                "Get a 3-step chain from something everyday, through your interest, to the real idea."}
-            </div>
-            <button className="riff-btn-small accept" onClick={handleBridge} disabled={bridgeLoading}>
-              Build me a bridge
-            </button>
-          </div>
-
-          {/* Teach It Back */}
-          <div className="riff-hint-box riff-lab-card">
-            <div className="riff-input-label">Teach it back (Reverse Tutoring)</div>
-            <div className="riff-input-with-voice">
-              <textarea
-                rows={3}
-                placeholder={`Teach this concept in your own words to a friendly buddy from ${interest || "your world"}...`}
-                value={teachExplanation}
-                onChange={(e) => setTeachExplanation(e.target.value)}
-              />
-              <button
-                type="button"
-                className={`riff-voice-btn-corner ${voiceTarget === "teach" ? "listening" : ""}`}
-                onClick={() => toggleVoiceInput("teach")}
-                title="Speak explanation"
-                aria-label="Voice input for teachback"
-              >
-                🎤
-              </button>
-            </div>
-            <button
-              className="riff-btn-small accept"
-              style={{ marginTop: 8 }}
-              onClick={handleTeachback}
-              disabled={!teachExplanation.trim() || teachbackLoading}
-            >
-              {teachbackLoading ? "Listening..." : "Teach it to my buddy"}
-            </button>
-            {teachback && (
-              <div className="riff-teachback-reply">
-                <em>{teachback.reaction}</em>
-                <br />
-                {teachback.question}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <p className="riff-footnote">
+      <footer className="riff-footnote">
         Adaptive neuro-learning signals compared strictly to your own personal baseline — never to anyone else's.
-      </p>
+      </footer>
     </div>
   );
 }

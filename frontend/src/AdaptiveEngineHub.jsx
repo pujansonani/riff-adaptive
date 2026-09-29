@@ -1,228 +1,211 @@
 // AdaptiveEngineHub.jsx
-// Main Adaptive Neuro-Learning Engine Hub:
-// Presents learner state (understanding, focus state, modality affinity, retention queue)
-// and houses the dynamic "[Try another way]" modality switch and "[Insights]" inspector.
+// Redesigned Central Adaptive Engine Hub:
+// The visual and cognitive command center of Riff Autopilot.
+// Displays live comprehension, focus states, current teaching mode, memory queue,
+// and adaptive strategy proposals with explainability actions.
 
 import { useState } from "react";
-import { MODALITIES } from "./modalityProfile.js";
+import { AUTOPILOT_STATES } from "./riffController.js";
 
-const STATE_COLORS = {
-  focused: { dot: "#10b981", label: "Focused Cadence", bg: "#ecfdf5", text: "#065f46" },
-  uncertain: { dot: "#f59e0b", label: "Exploring / Pondering", bg: "#fffbeb", text: "#92400e" },
-  struggling: { dot: "#ff6b4a", label: "Friction Detected", bg: "#fff1f2", text: "#9f1239" },
-  disengaging: { dot: "#8b5cf6", label: "Extended Pause", bg: "#f5f3ff", text: "#5b21b6" },
+const STATE_CONFIG = {
+  focused: { dot: "#10b981", label: "STEADY", sub: "Cadence aligned with personal baseline" },
+  uncertain: { dot: "#f59e0b", label: "PONDERING", sub: "Deliberate hesitation detected" },
+  struggling: { dot: "#ff6b4a", label: "FRICTION DETECTED", sub: "Pacing slowed + revision burst" },
+  disengaging: { dot: "#8b5cf6", label: "EXTENDED PAUSE", sub: "Inactivity on current step" },
+};
+
+const MODE_META = {
+  text: { icon: "📄", label: "Text Passage" },
+  visual: { icon: "🎨", label: "Visual Model (RiffBoard)" },
+  "micro-step": { icon: "🧩", label: "Micro-Steps (Focus)" },
+  analogy: { icon: "🌉", label: "Concept Bridge" },
+  audio: { icon: "🔊", label: "Audio Read Aloud" },
+  interactive: { icon: "🎮", label: "Interactive Steps" },
+  "teach-back": { icon: "🗣️", label: "Teach-Back Roleplay" },
+  retrieval: { icon: "🗂️", label: "Active Recall" },
 };
 
 export default function AdaptiveEngineHub({
-  adaptationDecision,
-  behaviorState,
-  understandingConfidence,
-  modalityInsights,
-  retentionStats,
+  autopilotState = AUTOPILOT_STATES.OBSERVING,
+  behaviorState = {},
+  understandingConfidence = null,
+  currentModality = "text",
+  adaptationDecision = null,
+  retentionStats = {},
+  onAcceptAdaptation,
+  onKeepCurrentModality,
+  onOpenWhyAdapted,
   onSelectModality,
-  learningSignals,
 }) {
-  const [showModalityMenu, setShowModalityMenu] = useState(false);
-  const [showInsights, setShowInsights] = useState(false);
+  const [showOverrideMenu, setShowOverrideMenu] = useState(false);
 
-  const stateCfg = STATE_COLORS[behaviorState?.state] || STATE_COLORS.focused;
+  const stateCfg = STATE_CONFIG[behaviorState?.state] || STATE_CONFIG.focused;
+  const currentModeInfo = MODE_META[currentModality] || MODE_META.text;
+
   const understandingPct = understandingConfidence !== null
     ? Math.round(understandingConfidence * 100)
-    : null;
+    : 45;
+
+  const autopilotLabels = {
+    [AUTOPILOT_STATES.OBSERVING]: "● Riff is observing your cadence",
+    [AUTOPILOT_STATES.THINKING]: "✦ Riff is analyzing understanding",
+    [AUTOPILOT_STATES.ADAPTING]: "⚡ Riff is changing teaching strategy",
+    [AUTOPILOT_STATES.HELPING]: "💡 Riff is offering focus support",
+    [AUTOPILOT_STATES.LEARNING]: "🌱 Riff is updating your Learning DNA",
+  };
 
   return (
     <div className="riff-adaptive-hub-card">
-      <div className="riff-hub-header">
-        <div className="riff-hub-title-group">
-          <div className="riff-hub-badge">ADAPTIVE NEURO-LEARNING ENGINE</div>
-          <h2 className="riff-hub-heading">Riff is adapting to your rhythm</h2>
+      {/* Top Header Row */}
+      <div className="riff-hub-header-row">
+        <div className="hub-title-badge-group">
+          <span className="riff-hub-badge">✦ RIFF ADAPTIVE ENGINE</span>
+          <span className={`autopilot-status-pill ${autopilotState}`}>
+            {autopilotLabels[autopilotState] || autopilotLabels[AUTOPILOT_STATES.OBSERVING]}
+          </span>
         </div>
 
-        <div className="riff-hub-actions">
+        <div className="hub-quick-actions">
           <button
-            className="riff-btn-small accept"
-            onClick={() => setShowModalityMenu(!showModalityMenu)}
-            aria-expanded={showModalityMenu}
+            className="riff-btn-small ghost"
+            onClick={() => setShowOverrideMenu(!showOverrideMenu)}
+            aria-expanded={showOverrideMenu}
           >
-            🔄 Try another way
-          </button>
-          <button
-            className={`riff-btn-small ${showInsights ? "accept" : "ghost"}`}
-            onClick={() => setShowInsights(!showInsights)}
-            aria-expanded={showInsights}
-          >
-            🔬 {showInsights ? "Hide Insights" : "Learner Insights"}
+            🔄 Try Another Way {showOverrideMenu ? "▲" : "▼"}
           </button>
         </div>
       </div>
 
-      {/* Primary Adaptive Status Indicators */}
-      <div className="riff-hub-grid">
-        {/* Understanding */}
-        <div className="riff-hub-cell">
-          <div className="cell-header">
-            <span className="indicator-dot" style={{ background: "#2d6e5e" }} />
-            <span className="cell-title">Understanding</span>
+      {/* 4 Core Vital Signs Grid */}
+      <div className="riff-hub-vitals-grid">
+        {/* Vital 1: Understanding Confidence */}
+        <div className="riff-vital-card">
+          <div className="vital-top">
+            <span className="vital-label">Learning Confidence</span>
+            <span className="vital-val-bold">{understandingPct}%</span>
           </div>
-          <div className="cell-value">
-            {understandingPct !== null ? `${understandingPct}%` : "In Progress"}
+          <div className="vital-progress-track">
+            <div
+              className="vital-progress-fill"
+              style={{
+                width: `${understandingPct}%`,
+                background:
+                  understandingPct >= 70
+                    ? "linear-gradient(90deg, #10b981 0%, #059669 100%)"
+                    : understandingPct >= 45
+                    ? "linear-gradient(90deg, #f59e0b 0%, #d97706 100%)"
+                    : "linear-gradient(90deg, #ff6b4a 0%, #e11d48 100%)",
+              }}
+            />
           </div>
-          <div className="cell-sub">
-            {understandingPct !== null && understandingPct >= 70
+          <span className="vital-sub">
+            {understandingPct >= 70
               ? "Strong conceptual grasp"
-              : understandingPct !== null
-              ? "Refining details"
-              : "Awaiting answer submission"}
-          </div>
+              : understandingPct >= 45
+              ? "Developing comprehension"
+              : "Awaiting answer feedback"}
+          </span>
         </div>
 
-        {/* Focus & Rhythm */}
-        <div className="riff-hub-cell">
-          <div className="cell-header">
-            <span className="indicator-dot pulse" style={{ background: stateCfg.dot }} />
-            <span className="cell-title">Focus State</span>
+        {/* Vital 2: Focus & Rhythm */}
+        <div className="riff-vital-card">
+          <div className="vital-top">
+            <span className="vital-label">Focus State</span>
+            <span className="vital-val-bold" style={{ color: stateCfg.dot }}>
+              <span className="dot pulse" style={{ background: stateCfg.dot, marginRight: 6 }} />
+              {stateCfg.label}
+            </span>
           </div>
-          <div className="cell-value" style={{ color: stateCfg.text }}>
-            {stateCfg.label}
-          </div>
-          <div className="cell-sub">
-            {behaviorState?.isFrictionDetected
-              ? "Adaptation ready to assist"
-              : "Steady rhythm against personal baseline"}
-          </div>
+          <span className="vital-sub" style={{ marginTop: 8 }}>
+            {stateCfg.sub}
+          </span>
         </div>
 
-        {/* Learning Modality */}
-        <div className="riff-hub-cell">
-          <div className="cell-header">
-            <span className="indicator-dot" style={{ background: "#8b5cf6" }} />
-            <span className="cell-title">Best Modality</span>
+        {/* Vital 3: Current Teaching Mode */}
+        <div className="riff-vital-card">
+          <div className="vital-top">
+            <span className="vital-label">Current Mode</span>
+            <span className="vital-val-bold">
+              {currentModeInfo.icon} {currentModeInfo.label}
+            </span>
           </div>
-          <div className="cell-value capitalize">
-            {modalityInsights?.topModality || "Analogy"}
-          </div>
-          <div className="cell-sub">
-            {Math.round((modalityInsights?.topAffinity || 0.65) * 100)}% historical affinity
-          </div>
+          <span className="vital-sub" style={{ marginTop: 8 }}>
+            Active multimodal presentation
+          </span>
         </div>
 
-        {/* Retention Queue */}
-        <div className="riff-hub-cell">
-          <div className="cell-header">
-            <span className="indicator-dot" style={{ background: "#f59e0b" }} />
-            <span className="cell-title">Memory Queue</span>
+        {/* Vital 4: Memory Health Queue */}
+        <div className="riff-vital-card">
+          <div className="vital-top">
+            <span className="vital-label">Memory Health</span>
+            <span className="vital-val-bold">
+              {retentionStats?.due > 0 ? `${retentionStats.due} Due Now` : "Up to Date"}
+            </span>
           </div>
-          <div className="cell-value">
-            {retentionStats?.due > 0 ? `${retentionStats.due} Due` : "Up to Date"}
-          </div>
-          <div className="cell-sub">
-            {retentionStats?.mastered || 0} / {retentionStats?.total || 0} concepts mastered
-          </div>
+          <span className="vital-sub" style={{ marginTop: 8 }}>
+            {retentionStats?.mastered || 0} mastered • {retentionStats?.total || 0} tracked
+          </span>
         </div>
       </div>
 
-      {/* Adaptive Recommendation Banner */}
-      {adaptationDecision && adaptationDecision.message && (
-        <div className="riff-adaptive-nudge-banner">
-          <div className="nudge-text">
-            <strong>🤖 Adaptive Suggestion:</strong> {adaptationDecision.message}
-          </div>
-          {adaptationDecision.actions && adaptationDecision.actions.length > 0 && (
-            <div className="nudge-actions">
-              {adaptationDecision.actions.map((act) => (
-                <button
-                  key={act.id}
-                  className={`riff-btn-small ${act.primary ? "accept" : "ghost"}`}
-                  onClick={() => onSelectModality(act.id)}
-                >
-                  {act.label}
-                </button>
-              ))}
+      {/* Riff Is Adapting Banner (Autonomous or Proposed Interventions) */}
+      {adaptationDecision && (
+        <div className="riff-is-adapting-box">
+          <div className="adapting-box-header">
+            <div className="adapting-badge">
+              <span>⚡</span> RIFF IS ADAPTING
             </div>
-          )}
+            {onOpenWhyAdapted && (
+              <button className="riff-explain-trigger-btn" onClick={onOpenWhyAdapted}>
+                🔍 Why Riff adapted?
+              </button>
+            )}
+          </div>
+
+          <p className="adapting-quote">“{adaptationDecision.message}”</p>
+
+          <div className="adapting-actions-row">
+            {adaptationDecision.actions?.map((act) => (
+              <button
+                key={act.id}
+                className={`riff-btn-small ${act.primary ? "accept" : "ghost"}`}
+                onClick={() => onAcceptAdaptation && onAcceptAdaptation(act.id)}
+              >
+                {act.label}
+              </button>
+            ))}
+            <button className="riff-btn-small dismiss" onClick={onKeepCurrentModality}>
+              Keep current mode
+            </button>
+          </div>
         </div>
       )}
 
-      {/* "Try another way" Modality Drawer */}
-      {showModalityMenu && (
-        <div className="riff-modality-picker-modal" role="region" aria-label="Learning Modality Selector">
-          <div className="picker-title">Switch Learning Modality</div>
-          <div className="riff-modality-grid">
+      {/* Manual Modality Override Drawer */}
+      {showOverrideMenu && (
+        <div className="riff-mode-override-drawer">
+          <span className="override-title">Riff can teach this concept as:</span>
+          <div className="override-chips-grid">
             {[
-              { id: "whiteboard", icon: "🎨", label: "RiffBoard Canvas", desc: "Draw, sketch & visualize concepts" },
-              { id: "step_mode", icon: "🪜", label: "Micro-Steps (Focus)", desc: "De-cluttered one-step instructions" },
-              { id: "audio", icon: "🔊", label: "Audio Read Aloud", desc: "Listen with synchronized word tracking" },
-              { id: "bridge", icon: "🌉", label: "Bridge It", desc: "3-step metaphor chain to your interest" },
-              { id: "teachback", icon: "🗣️", label: "Teach It Back", desc: "Explain it to an in-world character" },
-              { id: "flashcards", icon: "🗂️", label: "Flashcards & Recall", desc: "Spaced repetition memory practice" },
-              { id: "neuro_read", icon: "📖", label: "Reading Support", desc: "Accessible fonts, spacing & contrast" },
+              { id: "visual", icon: "🎨", label: "Visual (RiffBoard)" },
+              { id: "micro-step", icon: "🧩", label: "Step-by-Step" },
+              { id: "analogy", icon: "🌉", label: "Concept Bridge" },
+              { id: "audio", icon: "🔊", label: "Audio Narration" },
+              { id: "interactive", icon: "🎮", label: "Interactive Steps" },
+              { id: "teach-back", icon: "🗣️", label: "Teach It Back" },
+              { id: "retrieval", icon: "🗂️", label: "Recall Flashcards" },
             ].map((m) => (
               <button
                 key={m.id}
-                className="riff-modality-card"
+                className={`override-chip ${currentModality === m.id ? "active" : ""}`}
                 onClick={() => {
-                  onSelectModality(m.id);
-                  setShowModalityMenu(false);
+                  if (onSelectModality) onSelectModality(m.id);
+                  setShowOverrideMenu(false);
                 }}
               >
-                <span className="modality-icon">{m.icon}</span>
-                <span className="modality-name">{m.label}</span>
-                <span className="modality-desc">{m.desc}</span>
+                <span>{m.icon}</span> {m.label}
               </button>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* Learner Insights Inspector */}
-      {showInsights && (
-        <div className="riff-insights-drawer">
-          <div className="insights-header">
-            <h4>🔬 Learner Telemetry & Behavioral Model</h4>
-            <span className="insights-disclaimer">
-              *Signals compared strictly to your own baseline — never to other learners. No medical labels.
-            </span>
-          </div>
-
-          <div className="riff-insights-grid">
-            <div className="insight-stat-box">
-              <span className="insight-lbl">Personal Baseline Pace</span>
-              <span className="insight-val">{learningSignals?.baselineMean || 260} ms / key</span>
-            </div>
-            <div className="insight-stat-box">
-              <span className="insight-lbl">Current Pacing Z-Score</span>
-              <span className="insight-val">{learningSignals?.typingPacingZScore || "0.00"} σ</span>
-            </div>
-            <div className="insight-stat-box">
-              <span className="insight-lbl">Backspace Revision Ratio</span>
-              <span className="insight-val">
-                {Math.round((learningSignals?.backspaceRatio || 0) * 100)}%
-              </span>
-            </div>
-            <div className="insight-stat-box">
-              <span className="insight-lbl">ML Friction Probability</span>
-              <span className="insight-val">
-                {Math.round((behaviorState?.frictionScore || 0) * 100)}%
-              </span>
-            </div>
-          </div>
-
-          <div className="insights-modality-chart">
-            <span className="chart-heading">Modality Affinity Distribution</span>
-            <div className="modality-bars">
-              {(modalityInsights?.ranked || []).map((r) => (
-                <div key={r.modality} className="modality-bar-row">
-                  <span className="bar-label">{r.modality}</span>
-                  <div className="bar-track">
-                    <div
-                      className="bar-fill"
-                      style={{ width: `${Math.round(r.affinity * 100)}%` }}
-                    />
-                  </div>
-                  <span className="bar-val">{Math.round(r.affinity * 100)}%</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       )}

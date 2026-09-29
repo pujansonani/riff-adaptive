@@ -6,6 +6,7 @@ import {
   recordCardReview,
   getDueReviewCards,
   getRetentionStats,
+  getMemoryHealthOverview,
   SPACING_INTERVALS_MS,
 } from "./retentionEngine.js";
 
@@ -39,7 +40,7 @@ test("recordCardReview advances spacing level on correct recall", () => {
   assert.ok(card.nextReview > Date.now());
 });
 
-test("recordCardReview resets to level 0 on struggle", () => {
+test("recordCardReview resets to level 0 on struggle with explanation", () => {
   const sampleCard = { id: "test-card-2", front: "Hard Question?", back: "Answer", level: 3, nextReview: Date.now() };
   addCardsToRetention([sampleCard]);
 
@@ -48,4 +49,12 @@ test("recordCardReview resets to level 0 on struggle", () => {
 
   assert.equal(card.level, 0);
   assert.equal(card.status, "weak");
+  assert.match(card.scheduleReason, /retrieval/i);
+});
+
+test("getMemoryHealthOverview summarizes strong, growing, and review counts", () => {
+  const overview = getMemoryHealthOverview();
+  assert.ok(typeof overview.strongCount === "number");
+  assert.ok(typeof overview.growingCount === "number");
+  assert.ok(typeof overview.nextReviewDateStr === "string");
 });

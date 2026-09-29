@@ -1,16 +1,17 @@
 // retentionEngine.js
-// Memory & Retention Engine: Spaced repetition, flashcards, retrieval tracking,
-// and weak-concept review using browser localStorage.
+// Memory & Retention Engine: Adaptive Spaced Repetition, Flashcards,
+// Retrieval Tracking, and Memory Health Metrics.
 
 const RETENTION_STORAGE_KEY = "riff_recall_v1";
 
-// Spaced Repetition interval steps in milliseconds
+// Base Spaced Repetition interval steps in milliseconds
 export const SPACING_INTERVALS_MS = [
-  5 * 60 * 1000,          // Level 0: 5 minutes (immediate reinforcement)
-  24 * 60 * 60 * 1000,    // Level 1: 1 day
-  3 * 24 * 60 * 60 * 1000, // Level 2: 3 days
-  7 * 24 * 60 * 60 * 1000, // Level 3: 7 days
-  14 * 24 * 60 * 60 * 1000 // Level 4: 14 days
+  5 * 60 * 1000,           // Level 0: 5 minutes (immediate check)
+  24 * 60 * 60 * 1000,     // Level 1: 1 day
+  3 * 24 * 60 * 60 * 1000,  // Level 2: 3 days
+  7 * 24 * 60 * 60 * 1000,  // Level 3: 7 days
+  14 * 24 * 60 * 60 * 1000, // Level 4: 14 days
+  30 * 24 * 60 * 60 * 1000, // Level 5: 30 days (permanent mastery)
 ];
 
 let inMemoryRetentionStore = { cards: [], history: [], lastCheck: Date.now() };
@@ -68,6 +69,8 @@ export function generateDeterministicFlashcards(lessonText, interest) {
         status: "reviewing",
         attempts: 0,
         correctCount: 0,
+        consecutiveSuccess: 0,
+        scheduleReason: "Initial reinforcement after learning.",
       },
     ];
   }
@@ -100,6 +103,8 @@ export function generateDeterministicFlashcards(lessonText, interest) {
       status: "reviewing",
       attempts: 0,
       correctCount: 0,
+      consecutiveSuccess: 0,
+      scheduleReason: "Scheduled for initial review to consolidate memory.",
     };
   });
 }
@@ -125,9 +130,11 @@ export function addCardsToRetention(newCards) {
         level: typeof c.level === "number" ? c.level : 0,
         nextReview: typeof c.nextReview === "number" ? c.nextReview : Date.now() + SPACING_INTERVALS_MS[0],
         lastReviewed: Date.now(),
-        status: c.status || "reviewing", // 'weak' | 'reviewing' | 'mastered'
+        status: c.status || "reviewing", // 'weak' | 'growing' | 'strong' | 'mastered'
         attempts: c.attempts || 0,
         correctCount: c.correctCount || 0,
+        consecutiveSuccess: c.consecutiveSuccess || 0,
+        scheduleReason: c.scheduleReason || "Scheduled for memory consolidation.",
       });
     }
   }
@@ -151,10 +158,8 @@ export function getDueReviewCards(store) {
 }
 
 /**
- * Records the outcome of a flashcard / recall review.
- * @param {string} cardId
- * @param {boolean} isCorrect - whether the student recalled correctly
- * @param {number} confidence - learner's self-reported or evaluated confidence (0 to 1)
+ * Records the outcome of a flashcard / recall review with SMART ADAPTIVE SPACING.
+ * Shortens interval on struggle; extends and accelerates on consecutive successes.
  */
 export function recordCardReview(cardId, isCorrect, confidence = 0.8) {
   const store = loadRetentionStore();
@@ -163,16 +168,30 @@ export function recordCardReview(cardId, isCorrect, confidence = 0.8) {
   const updatedCards = store.cards.map((card) => {
     if (card.id !== cardId) return card;
 
-    let nextLevel = card.level;
-    let nextStatus = card.status;
+    let nextLevel = card.level || 0;
+    let nextStatus = card.status || "growing";
+    let consecutiveSuccess = card.consecutiveSuccess || 0;
+    let scheduleReason = "";
 
     if (isCorrect && confidence >= 0.6) {
-      nextLevel = Math.min(SPACING_INTERVALS_MS.length - 1, card.level + 1);
-      nextStatus = nextLevel >= 3 ? "mastered" : "reviewing";
+      consecutiveSuccess += 1;
+      // If student has multiple consecutive successes, accelerate progression
+      const step = consecutiveSuccess >= 2 ? 2 : 1;
+      nextLevel = Math.min(SPACING_INTERVALS_MS.length - 1, nextLevel + step);
+      
+      if (nextLevel >= 4) {
+        nextStatus = "strong";
+        scheduleReason = "Consistent mastery demonstrated; extended review interval.";
+      } else {
+        nextStatus = "growing";
+        scheduleReason = `Recalled correctly with ${Math.round(confidence * 100)}% confidence; interval moved to Level ${nextLevel}.`;
+      }
     } else {
-      // Step back to Level 0 on struggle
-      nextLevel = 0;
+      // Shorten interval on friction / struggle
+      consecutiveSuccess = 0;
+      nextLevel = 0; // Immediate 5-minute rescue
       nextStatus = "weak";
+      scheduleReason = "Riff scheduled this quick review because this concept needs another retrieval attempt.";
     }
 
     const intervalMs = SPACING_INTERVALS_MS[nextLevel];
@@ -182,11 +201,13 @@ export function recordCardReview(cardId, isCorrect, confidence = 0.8) {
       ...card,
       level: nextLevel,
       status: nextStatus,
+      consecutiveSuccess,
       attempts: (card.attempts || 0) + 1,
       correctCount: (card.correctCount || 0) + (isCorrect ? 1 : 0),
       lastReviewed: now,
       nextReview: nextReviewTime,
       lastConfidence: confidence,
+      scheduleReason,
     };
   });
 
@@ -213,17 +234,48 @@ export function recordCardReview(cardId, isCorrect, confidence = 0.8) {
 export function getRetentionStats(store) {
   const current = store || loadRetentionStore();
   const total = current.cards.length;
-  const mastered = current.cards.filter((c) => c.status === "mastered").length;
+  const strong = current.cards.filter((c) => c.status === "strong" || c.status === "mastered").length;
   const weak = current.cards.filter((c) => c.status === "weak").length;
-  const reviewing = current.cards.filter((c) => c.status === "reviewing").length;
+  const growing = current.cards.filter((c) => c.status === "growing" || c.status === "reviewing").length;
   const due = getDueReviewCards(current).length;
 
   return {
     total,
-    mastered,
+    mastered: strong,
+    strong,
     weak,
-    reviewing,
+    growing,
+    reviewing: growing,
     due,
-    masteryPct: total > 0 ? Math.round((mastered / total) * 100) : 0,
+    masteryPct: total > 0 ? Math.round((strong / total) * 100) : 0,
+  };
+}
+
+/**
+ * Memory Health summary for the dashboard.
+ */
+export function getMemoryHealthOverview(store) {
+  const current = store || loadRetentionStore();
+  const stats = getRetentionStats(current);
+  
+  // Find earliest next review timestamp
+  const futureCards = current.cards.filter((c) => c.nextReview > Date.now());
+  let nextReviewStr = "None scheduled";
+  if (stats.due > 0) {
+    nextReviewStr = "Due Now";
+  } else if (futureCards.length > 0) {
+    const earliest = Math.min(...futureCards.map((c) => c.nextReview));
+    const diffHours = Math.round((earliest - Date.now()) / (1000 * 60 * 60));
+    if (diffHours < 1) nextReviewStr = "In a few minutes";
+    else if (diffHours < 24) nextReviewStr = `In ${diffHours} hour${diffHours > 1 ? "s" : ""}`;
+    else nextReviewStr = "Tomorrow";
+  }
+
+  return {
+    strongCount: stats.strong,
+    growingCount: stats.growing,
+    reviewCount: stats.due,
+    nextReviewDateStr: nextReviewStr,
+    totalCards: stats.total,
   };
 }

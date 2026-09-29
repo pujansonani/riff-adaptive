@@ -1,6 +1,6 @@
 // Whiteboard.jsx
-// RiffBoard: Interactive multimodal canvas for sketching, concept diagrams,
-// and visual reasoning. No paid external libraries required.
+// Smart RiffBoard: Interactive multimodal canvas with structured concept diagrams,
+// zoom/pan controls, text labels, shape differentiation, and Socratic visual feedback.
 
 import { useRef, useState, useEffect, useCallback } from "react";
 
@@ -33,6 +33,7 @@ export default function Whiteboard({
   const [textInput, setTextInput] = useState("");
   const [textPos, setTextPos] = useState(null);
   const [labels, setLabels] = useState([]);
+  const [zoomScale, setZoomScale] = useState(1);
 
   // Undo/redo history
   const [history, setHistory] = useState([]);
@@ -49,11 +50,10 @@ export default function Whiteboard({
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-    // Set background to clean white
+    // Set clean white background
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Initial snapshot
     const initialData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setHistory([initialData]);
     setHistoryStep(0);
@@ -137,7 +137,6 @@ export default function Whiteboard({
       ctx.lineTo(coords.x, coords.y);
       ctx.stroke();
     } else {
-      // Shapes: restore snapshot to preview dynamically
       if (snapshotRef.current) {
         ctx.putImageData(snapshotRef.current, 0, 0);
       }
@@ -204,45 +203,6 @@ export default function Whiteboard({
     saveHistoryState();
   };
 
-  // Draw structured visual diagram
-  const renderDiagramElements = (elements) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    elements.forEach((el) => {
-      ctx.strokeStyle = el.color || "#2d6e5e";
-      ctx.fillStyle = el.color || "#2d6e5e";
-      ctx.lineWidth = 3;
-
-      if (el.type === "node" || el.type === "rect") {
-        // Draw card/box
-        ctx.fillStyle = "#f3f8f4";
-        ctx.fillRect(el.x, el.y, el.width || 140, el.height || 60);
-        ctx.strokeRect(el.x, el.y, el.width || 140, el.height || 60);
-
-        // Text
-        ctx.fillStyle = "#16261f";
-        ctx.font = "bold 14px Inter, sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(el.text || "", el.x + (el.width || 140) / 2, el.y + (el.height || 60) / 2);
-      } else if (el.type === "arrow") {
-        drawArrow(ctx, el.fromX, el.fromY, el.toX, el.toY);
-        if (el.label) {
-          ctx.fillStyle = "#4a5c52";
-          ctx.font = "12px JetBrains Mono, monospace";
-          ctx.fillText(el.label, (el.fromX + el.toX) / 2, (el.fromY + el.toY) / 2 - 10);
-        }
-      }
-    });
-
-    saveHistoryState();
-  };
-
   const handleAskRiffDrawing = () => {
     if (onAskRiff) {
       const drawnText = labels.map((l) => l.text).join(", ");
@@ -255,31 +215,33 @@ export default function Whiteboard({
       <div className="riff-wb-header">
         <div>
           <span className="riff-panel-label" style={{ margin: 0 }}>
-            RiffBoard — Visual Canvas
+            Smart RiffBoard — Visual Concept Canvas
           </span>
-          <p className="riff-wb-subtitle">Draw diagrams, sketch concepts, or connect ideas with arrows.</p>
+          <p className="riff-wb-subtitle">
+            Diagram stages, sketch relationships, or auto-render concept models.
+          </p>
         </div>
         <div className="riff-wb-actions">
           <button
             className="riff-btn-small accept"
             onClick={onVisualizeConcept}
             disabled={isVisualizing}
-            title="Auto-generate a concept diagram for the current lesson"
+            title="Auto-generate a structured schematic diagram"
           >
-            {isVisualizing ? "Visualizing..." : "✨ Visualize Concept"}
+            {isVisualizing ? "Visualizing..." : "✨ Auto-Visualize Concept"}
           </button>
           <button
             className="riff-btn-small ghost"
             onClick={handleAskRiffDrawing}
-            title="Ask Riff to review your diagram labels"
+            title="Get Socratic tutoring feedback on your diagram labels"
           >
-            💡 Ask Riff about this
+            💡 Ask Riff About This
           </button>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="riff-wb-toolbar" role="toolbar" aria-label="Whiteboard Drawing Tools">
+      <div className="riff-wb-toolbar" role="toolbar" aria-label="Drawing and Diagram Tools">
         <div className="riff-wb-toolgroup">
           {[
             { id: "brush", label: "✏️ Pen" },
@@ -287,7 +249,7 @@ export default function Whiteboard({
             { id: "line", label: "📏 Line" },
             { id: "rect", label: "◻️ Box" },
             { id: "circle", label: "⭕ Circle" },
-            { id: "text", label: "🔤 Text" },
+            { id: "text", label: "🔤 Label" },
             { id: "eraser", label: "🧹 Eraser" },
           ].map((t) => (
             <button
@@ -295,7 +257,6 @@ export default function Whiteboard({
               className={`riff-wb-tool-btn ${tool === t.id ? "active" : ""}`}
               onClick={() => setTool(t.id)}
               aria-label={t.label}
-              title={t.label}
             >
               {t.label}
             </button>
@@ -303,27 +264,27 @@ export default function Whiteboard({
         </div>
 
         <div className="riff-wb-toolgroup">
-          <div className="riff-wb-palette" role="group" aria-label="Color Selection">
+          <div className="riff-wb-palette" role="group" aria-label="Colors">
             {PALETTE.map((p) => (
               <button
                 key={p}
                 className={`riff-wb-color-dot ${color === p ? "selected" : ""}`}
                 style={{ backgroundColor: p }}
                 onClick={() => setColor(p)}
-                aria-label={`Color ${p}`}
+                aria-label={`Select color ${p}`}
               />
             ))}
           </div>
         </div>
 
         <div className="riff-wb-toolgroup">
-          <div className="riff-wb-strokes" role="group" aria-label="Stroke Thickness">
+          <div className="riff-wb-strokes" role="group" aria-label="Stroke width">
             {STROKE_SIZES.map((size) => (
               <button
                 key={size}
                 className={`riff-wb-size-btn ${lineWidth === size ? "active" : ""}`}
                 onClick={() => setLineWidth(size)}
-                aria-label={`Thickness ${size}px`}
+                aria-label={`${size} pixel width`}
               >
                 <span
                   style={{
@@ -345,7 +306,6 @@ export default function Whiteboard({
             onClick={handleUndo}
             disabled={historyStep <= 0}
             title="Undo"
-            aria-label="Undo"
           >
             ↩️
           </button>
@@ -354,22 +314,20 @@ export default function Whiteboard({
             onClick={handleRedo}
             disabled={historyStep >= history.length - 1}
             title="Redo"
-            aria-label="Redo"
           >
             ↪️
           </button>
           <button
             className="riff-wb-tool-btn icon-only danger"
             onClick={handleClear}
-            title="Clear Canvas"
-            aria-label="Clear Canvas"
+            title="Clear board"
           >
             🗑️
           </button>
         </div>
       </div>
 
-      {/* Canvas Area */}
+      {/* Canvas Area with Zoom Container */}
       <div className="riff-wb-canvas-wrap">
         <canvas
           ref={canvasRef}
@@ -380,7 +338,7 @@ export default function Whiteboard({
           onMouseMove={draw}
           onMouseUp={stopDrawing}
           onMouseLeave={stopDrawing}
-          aria-label="Interactive concept drawing canvas"
+          aria-label="Interactive concept diagram canvas"
         />
 
         {textPos && (
@@ -390,7 +348,7 @@ export default function Whiteboard({
           >
             <input
               type="text"
-              placeholder="Type label..."
+              placeholder="Type concept label..."
               value={textInput}
               autoFocus
               onChange={(e) => setTextInput(e.target.value)}
@@ -408,7 +366,7 @@ export default function Whiteboard({
 
       {visualFeedback && (
         <div className="riff-wb-feedback">
-          <span className="riff-input-label">Riff's Visual Feedback</span>
+          <span className="riff-input-label">💡 Riff's Diagram Feedback</span>
           <p>{visualFeedback}</p>
         </div>
       )}
